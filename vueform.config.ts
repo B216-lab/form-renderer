@@ -8,4 +8,5 @@ export default defineConfig({
   theme,
   locales: { ru },
   locale: 'ru',
+  showRequired: ['floating'],
 })
