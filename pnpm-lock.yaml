@@ -11,6 +11,9 @@ importers:
       '@vueform/vueform':
         specifier: ^1.13.2
         version: 1.13.2
+      axios:
+        specifier: ^1.12.2
+        version: 1.12.2
       vue:
         specifier: ^3.5.21
         version: 3.5.21(typescript@5.8.3)
