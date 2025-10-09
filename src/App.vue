@@ -1,6 +1,11 @@
 <template>
 <Vueform ref="form$">
-  <SelectElement name="address" :search="true" :delay="1000" :filter-results="false"
+  <SelectElement
+  label="Адрес проживания"
+  name="address" 
+  :search="true" 
+  :delay="ADDRESS_DELAY" 
+  :filter-results="false"
   :items="getAddressItems"
   />
 </Vueform>
@@ -11,6 +16,8 @@ import { ref } from 'vue'
 import type { DaDataAddress, DaDataSuggestion } from 'react-dadata'
 import { fetchDaDataSuggestionsAddress } from './components/DadataApi'
 
+const ADDRESS_DELAY = 1000;
+const MIN_CHARS = 3;
 // Использует AbortController для отмены предыдущих запросов при новом вводе
 const abortControllerRef = ref<AbortController | null>(null)
 
@@ -21,6 +28,7 @@ const abortControllerRef = ref<AbortController | null>(null)
  * :return: массив элементов с полями value/label
  */
 async function getAddressItems(searchQuery: string) {
+
   console.log('[DaData] getAddressItems called', { searchQuery })
   // Отменить предыдущий незавершённый запрос
   if (abortControllerRef.value) {
@@ -33,7 +41,7 @@ async function getAddressItems(searchQuery: string) {
   console.log('[DaData] New AbortController created')
 
   // Минимальная длина запроса для снижения шума
-  if (!searchQuery || searchQuery.trim().length < 3) {
+  if (!searchQuery || searchQuery.trim().length < MIN_CHARS) {
     console.log('[DaData] Query too short, skip fetch', { length: searchQuery?.trim().length || 0 })
     return []
   }
