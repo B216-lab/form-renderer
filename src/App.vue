@@ -1,5 +1,5 @@
 <template>
-<Vueform ref="form$">
+<Vueform :prepare="prepare" ref="form$">
   <SelectElement
   label="Адрес проживания"
   name="address" 
@@ -8,6 +8,16 @@
   :filter-results="false"
   :items="getAddressItems"
   />
+
+  <SelectElement
+  label="Другой адрес проживания"
+  name="address_other" 
+  :search="true" 
+  :delay="ADDRESS_DELAY" 
+  :filter-results="false"
+  :items="getAddressItems"
+  />
+  <ButtonElement name="submit" button-label="Submit" submits />
 </Vueform>
 </template>
 
@@ -15,6 +25,18 @@
 import { ref } from 'vue'
 import type { DaDataAddress, DaDataSuggestion } from 'react-dadata'
 import { fetchDaDataSuggestionsAddress } from './components/DadataApi'
+
+
+const prepare = (form$) => { // form$ is the <Vueform> component
+  try {
+    console.log(form$.data)
+  } catch (error) {
+    throw error // this will cancel the submit process
+  }
+}
+
+
+
 
 const ADDRESS_DELAY = 1000;
 const MIN_CHARS = 3;
@@ -51,8 +73,9 @@ async function getAddressItems(searchQuery: string) {
     const { suggestions } = await fetchDaDataSuggestionsAddress(controller.signal, { query: searchQuery })
     const count = suggestions?.length ?? 0
     console.log('[DaData] Suggestions received', { count })
+    console.log(suggestions)
     return (suggestions ?? []).map((s: DaDataSuggestion<DaDataAddress>) => ({
-      value: s.value,
+      value: s.data,
       label: s.value,
     }))
   } catch (err) {
