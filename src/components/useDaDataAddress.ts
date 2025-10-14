@@ -9,8 +9,8 @@ const DEFAULT_MIN_CHARS = 3
 /**
  * Возвращает логику получения подсказок адреса DaData
  *
- * :param minChars: минимальная длина поисковой строки
- * :return: функции и значения для интеграции с SelectElement
+ * @param minChars - Минимальная длина поисковой строки
+ * @returns Функции и значения для интеграции с SelectElement
  */
 export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
   // Использует AbortController для отмены предыдущих запросов при новом вводе
@@ -19,8 +19,8 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
   /**
    * Получает элементы подсказок адреса для SelectElement
    *
-   * :param searchQuery: строка поиска, вводимая пользователем
-   * :return: массив элементов с полями value/label
+   * @param searchQuery - Строка поиска, вводимая пользователем
+   * @returns Массив элементов с полями value/label
    */
   async function getAddressItems(searchQuery: string) {
     logger.debug('[DaData] getAddressItems called', { searchQuery })
