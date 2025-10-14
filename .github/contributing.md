@@ -1,1 +1,1 @@
-- Stick to [Conventional Commit Messages](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
+- Stick to [Conventional Commit Messages](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) and [conventional review comments](https://conventionalcomments.org/)
