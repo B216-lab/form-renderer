@@ -1,4 +1,7 @@
-
+<!--
+This component allows users to dynamically choose where they'd like the center of a Google Map to be by simply clicking on the desired location. Example from
+VueForm Discord Server.
+-->
 <template>
   <component :is="elementLayout" :multiple="true" ref="container">
     <template #element>
@@ -26,7 +29,6 @@
 </template>
 
 <script>
-// This component allows users to dynamically choose where they'd like the center of a Google Map to be by simply clicking on the desired location. It's been super helpful in one of my projects where having a configurable map center was crucial.
 import { computed, onMounted, ref } from "vue";
 import { defineElement } from "@vueform/vueform";
 
