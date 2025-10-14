@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import type { DaDataAddress, DaDataSuggestion } from 'react-dadata'
 import { fetchDaDataSuggestionsAddress } from './DadataApi'
+import { logger } from '../logger'
 
 const DEFAULT_ADDRESS_DELAY = 1000
 const DEFAULT_MIN_CHARS = 3
@@ -22,38 +23,38 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
    * :return: массив элементов с полями value/label
    */
   async function getAddressItems(searchQuery: string) {
-    console.log('[DaData] getAddressItems called', { searchQuery })
+    logger.debug('[DaData] getAddressItems called', { searchQuery })
 
     if (abortControllerRef.value) {
-      console.log('[DaData] Aborting previous request')
+      logger.debug('[DaData] Aborting previous request')
       abortControllerRef.value.abort()
     }
 
     const controller = new AbortController()
     abortControllerRef.value = controller
-    console.log('[DaData] New AbortController created')
+    logger.verbose('[DaData] New AbortController created')
 
     if (!searchQuery || searchQuery.trim().length < minChars) {
-      console.log('[DaData] Query too short, skip fetch', { length: searchQuery?.trim().length || 0 })
+      logger.info('[DaData] Query too short, skip fetch', { length: searchQuery?.trim().length || 0 })
       return []
     }
 
     try {
-      console.log('[DaData] Fetching suggestions...', { query: searchQuery })
+      logger.debug('[DaData] Fetching suggestions...', { query: searchQuery })
       const { suggestions } = await fetchDaDataSuggestionsAddress(controller.signal, { query: searchQuery })
       const count = suggestions?.length ?? 0
-      console.log('[DaData] Suggestions received', { count })
-      console.log(suggestions)
+      logger.info('[DaData] Suggestions received', { count })
+      logger.verbose('[DaData] Suggestions payload', suggestions)
       return (suggestions ?? []).map((s: DaDataSuggestion<DaDataAddress>) => ({
         value: s.data,
         label: s.value,
       }))
     } catch (err) {
       if (controller.signal.aborted) {
-        console.log('[DaData] Request aborted')
+        logger.warn('[DaData] Request aborted')
         return []
       }
-      console.error('[DaData] Error while fetching suggestions', err)
+      logger.error('[DaData] Error while fetching suggestions', err)
       return []
     }
   }

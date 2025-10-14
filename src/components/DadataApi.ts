@@ -1,5 +1,5 @@
 import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from "axios";
-import { devlog } from "../utils";
+import { logger } from "../logger";
 import type { DaDataAddress, DaDataSuggestion } from "react-dadata";
 import { getEnvValue, EnvKey } from "../utils";
 
@@ -27,12 +27,12 @@ export const createDaDataInstance = async <T>(
       ...options,
     });
 
+    logger.debug('[DaDataAPI] Response received', { url: config.url, status: response.status })
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
         const message = "Dadata Request failed";
-      devlog(message);
-      devlog(error);
+      logger.error('[DaDataAPI] Request error', { message, status: error.response?.status, url: error.config?.url })
       throw new AxiosError(
         message,
         error.response?.status.toString(),
