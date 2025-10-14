@@ -76,8 +76,3 @@ export enum Transport {
   CITY_BIKE_RENTAL = "городской велопрокат",
   SERVICE = "служебный транспорт",
 }
-
-export enum Currency {
-  KGS = "KGS",
-  RUB = "RUB",
-}
