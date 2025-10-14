@@ -1,7 +1,7 @@
 import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from "axios";
-import { logger } from "../logger";
+import { logger } from "@/logger";
 import type { DaDataAddress, DaDataSuggestion } from "react-dadata";
-import { getEnvValue, EnvKey } from "../utils";
+import { getEnvValue, EnvKey } from "@/utils";
 
 
 const API_KEY = getEnvValue(EnvKey.ApiKey);

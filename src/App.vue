@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDaDataAddress } from './components/useDaDataAddress'
+import { useDaDataAddress } from '@/components/useDaDataAddress'
 
 
 const prepare = (form$: any) => {
