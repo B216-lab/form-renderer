@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDaDataAddress } from '@/components/useDaDataAddress'
+import { useDaDataAddress } from '@/daDataService/useDaDataAddress'
 import { useCounterStore } from '@/stores/counter'
 
 

@@ -9,11 +9,11 @@ const API_URL = getEnvValue(EnvKey.ApiUrl);
 
 
 export const apiDaDataInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL as string,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    Authorization: "Token " + API_KEY,
+    Authorization: "Token " + API_KEY as string,
   },
 });
 
