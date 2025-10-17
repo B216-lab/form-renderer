@@ -1,24 +1,12 @@
 <template>
-<Vueform :prepare="prepare" ref="form$" v-model="data" sync >
-  <SelectElement
-  label="Адрес проживания"
-  name="address" 
-  :search="true" 
-  :delay="ADDRESS_DELAY" 
-  :filter-results="false"
-  :items="getAddressItems"
-  />
+  <Vueform :prepare="prepare" ref="form$" v-model="data" sync>
+    <SelectElement label="Адрес проживания" name="address" :search="true" :delay="ADDRESS_DELAY" :filter-results="false"
+      :items="getAddressItems" />
 
-  <SelectElement
-  label="Другой адрес проживания"
-  name="address_other" 
-  :search="true" 
-  :delay="ADDRESS_DELAY" 
-  :filter-results="false"
-  :items="getAddressItems"
-  />
-  <ButtonElement name="submit" button-label="Submit" submits />
-</Vueform>
+    <SelectElement label="Другой адрес проживания" name="address_other" :search="true" :delay="ADDRESS_DELAY"
+      :filter-results="false" :items="getAddressItems" />
+    <ButtonElement name="submit" button-label="Submit" submits />
+  </Vueform>
 </template>
 
 <script setup lang="ts">
@@ -45,4 +33,3 @@ const data = computed({
 
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3)
 </script>
-
