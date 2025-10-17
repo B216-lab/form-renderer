@@ -1,11 +1,7 @@
-export const devlog = (message: any) => {
-  if (import.meta.env.VITE_ENV === "development") {
-    console.log(message);
-  }
-};
+import { logger } from "@/logger";
 
 /**
- * Перечисление для ключей переменных окружения, связанных с Dadata
+ * Перечисление для ключей переменных окружения
  */
 export enum EnvKey {
     ApiKey = "VITE_DADATA_KEY",
@@ -15,14 +11,14 @@ export enum EnvKey {
 /**
  * Получает значение переменной окружения по ключу из DadataEnvKey
  *
- * :param key: ключ из перечисления DadataEnvKey
- * :raises: Error если переменная не установлена
- * :return: строка с значением переменной окружения
+ * @param key ключ из перечисления
+ * @throws Error если переменная не установлена
+ * @returns строка с значением переменной окружения
  */
-export function getEnvValue(key: EnvKey): string {
+export function getEnvValue(key: EnvKey): string | number | boolean {
     const value = import.meta.env[key];
     if (!value) {
-        devlog(`ENV variable "${key}" is not set`);
+        logger.error(`Environment variable "${key}" is not set`);
         throw new Error(`ENV variable "${key}" is not set`);
     }
     return value;
