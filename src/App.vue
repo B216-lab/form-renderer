@@ -1,11 +1,5 @@
 <template>
-<Vueform :prepare="prepare" ref="form$">
-  <div style="margin-bottom: 12px">
-    <div>Pinia demo:</div>
-    <div>Count: {{ counter.count }} | Double: {{ counter.doubleCount }}</div>
-    <button type="button" @click="counter.increment()">+1</button>
-    <button type="button" @click="counter.decrement()">-1</button>
-  </div>
+<Vueform :prepare="prepare" ref="form$" v-model="data" sync >
   <SelectElement
   label="Адрес проживания"
   name="address" 
@@ -29,8 +23,8 @@
 
 <script setup lang="ts">
 import { useDaDataAddress } from '@/daDataService/useDaDataAddress'
-import { useCounterStore } from '@/stores/counter'
-
+import { computed } from 'vue'
+import { useFormsStore } from '@/forms/formDataStore'
 
 const prepare = (form$: any) => {
   try {
@@ -41,9 +35,14 @@ const prepare = (form$: any) => {
 }
 
 
+const store = useFormsStore()
+
+const data = computed({
+  get: () => store.form,
+  set: (data) => store.form = data
+})
 
 
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3)
-const counter = useCounterStore()
 </script>
 
