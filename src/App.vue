@@ -13,13 +13,10 @@
 import { useDaDataAddress } from '@/daDataService/useDaDataAddress'
 import { computed } from 'vue'
 import { useFormsStore } from '@/forms/formDataStore'
+import type { Vueform } from '@vueform/vueform'
 
-const prepare = (form$: any) => {
-  try {
-    console.log(form$.data)
-  } catch (error) {
-    throw error
-  }
+const prepare = (form$: Vueform) => {
+  console.log(form$.data)
 }
 
 
