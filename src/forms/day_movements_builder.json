@@ -1,0 +1,1029 @@
+{
+  "schema": {
+    "age": {
+      "name": "age",
+      "type": "text",
+      "inputType": "number",
+      "rules": [
+        "required",
+        "min:7",
+        "max:80",
+        "integer"
+      ],
+      "autocomplete": "off",
+      "builder": {
+        "type": "number",
+        "label": "Number input"
+      },
+      "label": "Возраст",
+      "placeholder": "18",
+      "forceNumbers": true,
+      "columns": {
+        "container": 6
+      },
+      "floating": false
+    },
+    "gender": {
+      "name": "gender",
+      "type": "select",
+      "items": [
+        {
+          "value": "FEMALE",
+          "label": "Жен"
+        },
+        {
+          "value": "MALE",
+          "label": "Муж"
+        }
+      ],
+      "native": false,
+      "builder": {
+        "type": "select",
+        "label": "Select"
+      },
+      "columns": {
+        "container": 6
+      },
+      "label": "Пол",
+      "rules": [
+        "required"
+      ],
+      "floating": "Пол"
+    },
+    "socialStatus": {
+      "name": "socialStatus",
+      "type": "select",
+      "native": false,
+      "builder": {
+        "type": "select",
+        "label": "Select"
+      },
+      "label": "Социальное положение",
+      "caret": false,
+      "items": [
+        {
+          "value": "RETIRED",
+          "label": "Пенсионер"
+        },
+        {
+          "value": "STUDENT",
+          "label": "Студент"
+        },
+        {
+          "value": "PUPIL",
+          "label": "Школьник"
+        },
+        {
+          "value": "WORKER",
+          "label": "Работающий"
+        }
+      ],
+      "rules": [
+        "required"
+      ],
+      "columns": {
+        "container": 6
+      }
+    },
+    "transportationCosts": {
+      "name": "transportationCosts",
+      "type": "select",
+      "items": [
+        {
+          "value": "LESS1000",
+          "label": "Менее 1000"
+        },
+        {
+          "value": "10002000",
+          "label": "1000-2000"
+        },
+        {
+          "value": "20003000",
+          "label": "2000-3000"
+        }
+      ],
+      "native": false,
+      "builder": {
+        "type": "select",
+        "label": "Select"
+      },
+      "label": "Затраты на транспорт",
+      "caret": false,
+      "rules": [
+        "required"
+      ],
+      "columns": {
+        "container": 6
+      }
+    },
+    "coordinatesAddress": {
+      "name": "coordinatesAddress",
+      "type": "select",
+      "items": [
+        {
+          "value": 0,
+          "label": "Label"
+        }
+      ],
+      "search": true,
+      "native": false,
+      "label": "Адрес проживания",
+      "inputType": "search",
+      "autocomplete": "off",
+      "builder": {
+        "type": "select",
+        "label": "Select"
+      },
+      "rules": [
+        "required"
+      ]
+    },
+    "dateMovements": {
+      "name": "dateMovements",
+      "type": "date",
+      "builder": {
+        "type": "date",
+        "label": "Date"
+      },
+      "label": "Дата передвижений",
+      "rules": [
+        "required"
+      ],
+      "fieldName": "date_id",
+      "columns": {
+        "container": 6
+      }
+    },
+    "financialSituation": {
+      "name": "financialSituation",
+      "type": "select",
+      "items": [
+        {
+          "value": 0,
+          "label": "Label"
+        }
+      ],
+      "search": true,
+      "native": false,
+      "inputType": "search",
+      "autocomplete": "off",
+      "builder": {
+        "type": "select",
+        "label": "Select"
+      },
+      "label": "Ежемесячный доход",
+      "columns": {
+        "container": 6
+      },
+      "rules": [
+        "required"
+      ]
+    },
+    "baseComment": {
+      "name": "baseComment",
+      "type": "textarea",
+      "builder": {
+        "type": "textarea",
+        "label": "Textarea"
+      },
+      "label": "Комментарий",
+      "description": "Код предприятия"
+    },
+    "h1": {
+      "name": "h1",
+      "type": "static",
+      "tag": "h1",
+      "content": "Важно",
+      "builder": {
+        "type": "h1",
+        "label": "H1 header"
+      }
+    },
+    "html": {
+      "name": "html",
+      "type": "static",
+      "content": "<ol>\n<li>\n1. Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности (например: 1 - из дома на работу, 2 - с работы в магазин, 3 - из магазина домой, 4 - снова из дома в детский сад и т.д.)\n</li>\n<li>\n2. В каждом передвижении важно выбирать адрес отправления и прибытия из списка, который выпадает в качестве подсказки при вводе адреса (для корректного определения координат местоположения)\n</li>\n</ol>",
+      "builder": {
+        "type": "html",
+        "label": "Static HTML"
+      },
+      "expressions": true
+    },
+    "divider": {
+      "name": "divider",
+      "type": "static",
+      "tag": "hr",
+      "builder": {
+        "type": "divider",
+        "label": "Divider"
+      }
+    },
+    "movements": {
+      "name": "movements",
+      "type": "list",
+      "element": {
+        "type": "object",
+        "name": "container",
+        "builder": {
+          "type": "container"
+        },
+        "schema": {
+          "container": {
+            "name": "container",
+            "type": "group",
+            "builder": {
+              "type": "container",
+              "label": "Container"
+            },
+            "schema": {
+              "typeMovement": {
+                "name": "typeMovement",
+                "type": "radiogroup",
+                "view": "tabs",
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Пешком"
+                  },
+                  {
+                    "value": 1,
+                    "label": "Транспорт"
+                  }
+                ],
+                "builder": {
+                  "type": "radioTabs",
+                  "label": "Radio tabs"
+                },
+                "rules": [
+                  "required"
+                ]
+              },
+              "transport": {
+                "name": "transport",
+                "type": "multiselect",
+                "closeOnSelect": false,
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Велосипед"
+                  },
+                  {
+                    "value": "1",
+                    "label": "Автобус"
+                  },
+                  {
+                    "value": "2",
+                    "label": "Трамвай"
+                  },
+                  {
+                    "value": "3",
+                    "label": "Каршеринг"
+                  }
+                ],
+                "search": true,
+                "native": false,
+                "label": "Тип транспорта",
+                "inputType": "search",
+                "autocomplete": "off",
+                "builder": {
+                  "type": "multiselect",
+                  "label": "Multiselect"
+                },
+                "rules": [
+                  "required",
+                  "min:1"
+                ],
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "numberPeopleInCar": {
+                "name": "numberPeopleInCar",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "nullable",
+                  "required",
+                  "min:1",
+                  "max:15",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Количество людей в автомобиле",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "forceNumbers": true,
+                "conditions": [
+                  [
+                    "movements.*.container.transport",
+                    "in",
+                    [
+                      "3"
+                    ]
+                  ]
+                ],
+                "default": "1"
+              },
+              "pedestrianApproachtoStartingStopOrParkingLot": {
+                "name": "pedestrianApproachtoStartingStopOrParkingLot",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "nullable",
+                  "required",
+                  "min:5",
+                  "max:180",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Время пешего пути к начальной остановке / парковке (в минутах)",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "forceNumbers": true,
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "waitingTimeForTransport": {
+                "name": "waitingTimeForTransport",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "nullable",
+                  "required",
+                  "min:5",
+                  "max:180",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Время ожидания транспорта на начальной остановке (в минутах)",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "forceNumbers": true,
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "numberOfTransfers": {
+                "name": "numberOfTransfers",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "required",
+                  "min:0",
+                  "max:15",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Количество пересадок",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "forceNumbers": true,
+                "default": "0",
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "waitingTimeBetweenTransfers": {
+                "name": "waitingTimeBetweenTransfers",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "required",
+                  "min:0",
+                  "max:180",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Суммарное время ожидания при пересадке / пересадках (в минутах)",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "default": "0"
+              },
+              "departureTime": {
+                "name": "departureTime",
+                "type": "date",
+                "label": "Время отправления",
+                "time": true,
+                "date": false,
+                "builder": {
+                  "type": "time",
+                  "label": "Time"
+                },
+                "columns": {
+                  "container": 6
+                },
+                "rules": [
+                  "required"
+                ]
+              },
+              "departurePlace": {
+                "name": "departurePlace",
+                "type": "select",
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Дом - место жительства"
+                  },
+                  {
+                    "value": null,
+                    "label": "Дом друзей или родственников"
+                  }
+                ],
+                "search": true,
+                "native": false,
+                "label": "Пункт отправления",
+                "inputType": "search",
+                "autocomplete": "off",
+                "builder": {
+                  "type": "select",
+                  "label": "Select"
+                },
+                "columns": {
+                  "container": 6
+                },
+                "rules": [
+                  "required"
+                ]
+              },
+              "coordinatesDepartureAddress": {
+                "name": "coordinatesDepartureAddress",
+                "type": "select",
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Label"
+                  }
+                ],
+                "search": true,
+                "native": false,
+                "label": "Адрес отправления",
+                "inputType": "search",
+                "autocomplete": "off",
+                "builder": {
+                  "type": "select",
+                  "label": "Select"
+                }
+              },
+              "divider_1": {
+                "name": "divider_1",
+                "type": "static",
+                "tag": "hr",
+                "builder": {
+                  "type": "divider",
+                  "label": "Divider"
+                }
+              },
+              "arrivalTime": {
+                "name": "arrivalTime",
+                "type": "date",
+                "label": "Время прибытия",
+                "time": true,
+                "date": false,
+                "builder": {
+                  "type": "time",
+                  "label": "Time"
+                },
+                "columns": {
+                  "container": 6
+                },
+                "rules": [
+                  "required"
+                ]
+              },
+              "arrivalPlace": {
+                "name": "arrivalPlace",
+                "type": "select",
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Дом - место жительства"
+                  },
+                  {
+                    "value": null,
+                    "label": "Дом друзей или родственников"
+                  }
+                ],
+                "search": true,
+                "native": false,
+                "label": "Пункт прибытия",
+                "inputType": "search",
+                "autocomplete": "off",
+                "builder": {
+                  "type": "select",
+                  "label": "Select"
+                },
+                "columns": {
+                  "container": 6
+                },
+                "rules": [
+                  "required"
+                ]
+              },
+              "pedestrianApproachFromFinalStopOrParking": {
+                "name": "pedestrianApproachFromFinalStopOrParking",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "required",
+                  "min:0",
+                  "max:180",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Время пешего хода от конечной остановки / парковки до места прибытия (в минутах)",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "number": {
+                "name": "number",
+                "type": "text",
+                "inputType": "number",
+                "rules": [
+                  "nullable",
+                  "min:0",
+                  "max:25000",
+                  "integer"
+                ],
+                "autocomplete": "off",
+                "label": "Стоимость поездки / парковки",
+                "builder": {
+                  "type": "number",
+                  "label": "Number input"
+                },
+                "conditions": [
+                  [
+                    "movements.*.container.typeMovement",
+                    "in",
+                    [
+                      1
+                    ]
+                  ]
+                ]
+              },
+              "coordinatesArrivalAddress": {
+                "name": "coordinatesArrivalAddress",
+                "type": "select",
+                "items": [
+                  {
+                    "value": 0,
+                    "label": "Label"
+                  }
+                ],
+                "search": true,
+                "native": false,
+                "inputType": "search",
+                "autocomplete": "off",
+                "builder": {
+                  "type": "select",
+                  "label": "Select"
+                },
+                "label": "Адрес прибытия"
+              },
+              "divider_2": {
+                "name": "divider_2",
+                "type": "static",
+                "tag": "hr",
+                "builder": {
+                  "type": "divider",
+                  "label": "Divider"
+                }
+              },
+              "textarea": {
+                "name": "textarea",
+                "type": "textarea",
+                "label": "Комментарий",
+                "builder": {
+                  "type": "textarea",
+                  "label": "Textarea"
+                },
+                "description": "Пожелания по улучшению транспортной инфраструктуры"
+              }
+            }
+          }
+        }
+      },
+      "builder": {
+        "type": "nestedList",
+        "label": "Nested list"
+      },
+      "min": 1,
+      "max": 15,
+      "addText": "Добавить передвижение",
+      "rules": [
+        "required",
+        "min:1",
+        "max:15"
+      ]
+    }
+  },
+  "form": {
+    "size": "md",
+    "displayErrors": false,
+    "nesting": true,
+    "steps": {
+      "page0": {
+        "elements": [
+          "age",
+          "gender",
+          "socialStatus",
+          "transportationCosts",
+          "coordinatesAddress",
+          "dateMovements",
+          "financialSituation",
+          "baseComment"
+        ],
+        "builder": {
+          "type": "steps"
+        },
+        "label": "Общая информация",
+        "labels": {
+          "next": "Далее"
+        },
+        "buttons": {
+          "previous": false
+        }
+      },
+      "page1": {
+        "elements": [
+          "h1",
+          "html",
+          "divider",
+          "movements"
+        ],
+        "builder": {
+          "type": "steps"
+        },
+        "label": "Передвижения",
+        "labels": {
+          "previous": "Назад",
+          "next": "Завершить"
+        }
+      }
+    }
+  },
+  "export": {
+    "vue": 3,
+    "output": "inline",
+    "api": "options",
+    "theme": "local"
+  },
+  "builder": {
+    "name": "DayMovements",
+    "locale": "en",
+    "width": "800px"
+  },
+  "theme": {
+    "primary": "#07bf9b",
+    "primary-darker": "#06ac8b",
+    "color-on-primary": "#ffffff",
+    "danger": "#ef4444",
+    "danger-lighter": "#fee2e2",
+    "success": "#10b981",
+    "success-lighter": "#d1fae5",
+    "gray-50": "#f9fafb",
+    "gray-100": "#f3f4f6",
+    "gray-200": "#e5e7eb",
+    "gray-300": "#d1d5db",
+    "gray-400": "#9ca3af",
+    "gray-500": "#6b7280",
+    "gray-600": "#4b5563",
+    "gray-700": "#374151",
+    "gray-800": "#1f2937",
+    "gray-900": "#111827",
+    "dark-50": "#EFEFEF",
+    "dark-100": "#DCDCDC",
+    "dark-200": "#BDBDBD",
+    "dark-300": "#A0A0A0",
+    "dark-400": "#848484",
+    "dark-500": "#737373",
+    "dark-600": "#393939",
+    "dark-700": "#323232",
+    "dark-800": "#262626",
+    "dark-900": "#191919",
+    "ring-width": "2px",
+    "ring-color": "#07bf9b66",
+    "link-color": "var(--vf-primary)",
+    "link-decoration": "inherit",
+    "font-size": "1rem",
+    "font-size-sm": "0.875rem",
+    "font-size-lg": "1rem",
+    "font-size-small": "0.875rem",
+    "font-size-small-sm": "0.8125rem",
+    "font-size-small-lg": "0.875rem",
+    "font-size-h1": "2.125rem",
+    "font-size-h1-sm": "2.125rem",
+    "font-size-h1-lg": "2.125rem",
+    "font-size-h2": "1.875rem",
+    "font-size-h2-sm": "1.875rem",
+    "font-size-h2-lg": "1.875rem",
+    "font-size-h3": "1.5rem",
+    "font-size-h3-sm": "1.5rem",
+    "font-size-h3-lg": "1.5rem",
+    "font-size-h4": "1.25rem",
+    "font-size-h4-sm": "1.25rem",
+    "font-size-h4-lg": "1.25rem",
+    "font-size-h1-mobile": "1.5rem",
+    "font-size-h1-mobile-sm": "1.5rem",
+    "font-size-h1-mobile-lg": "1.5rem",
+    "font-size-h2-mobile": "1.25rem",
+    "font-size-h2-mobile-sm": "1.25rem",
+    "font-size-h2-mobile-lg": "1.25rem",
+    "font-size-h3-mobile": "1.125rem",
+    "font-size-h3-mobile-sm": "1.125rem",
+    "font-size-h3-mobile-lg": "1.125rem",
+    "font-size-h4-mobile": "1rem",
+    "font-size-h4-mobile-sm": "1rem",
+    "font-size-h4-mobile-lg": "1rem",
+    "font-size-blockquote": "1rem",
+    "font-size-blockquote-sm": "0.875rem",
+    "font-size-blockquote-lg": "1rem",
+    "line-height": "1.5rem",
+    "line-height-sm": "1.25rem",
+    "line-height-lg": "1.5rem",
+    "line-height-small": "1.25rem",
+    "line-height-small-sm": "1.125rem",
+    "line-height-small-lg": "1.25rem",
+    "line-height-headings": "1.2",
+    "line-height-headings-sm": "1.2",
+    "line-height-headings-lg": "1.2",
+    "line-height-blockquote": "1.5rem",
+    "line-height-blockquote-sm": "1.25rem",
+    "line-height-blockquote-lg": "1.5rem",
+    "letter-spacing": "0px",
+    "letter-spacing-sm": "0px",
+    "letter-spacing-lg": "0px",
+    "letter-spacing-small": "0px",
+    "letter-spacing-small-sm": "0px",
+    "letter-spacing-small-lg": "0px",
+    "letter-spacing-headings": "0px",
+    "letter-spacing-headings-sm": "0px",
+    "letter-spacing-headings-lg": "0px",
+    "letter-spacing-blockquote": "0px",
+    "letter-spacing-blockquote-sm": "0px",
+    "letter-spacing-blockquote-lg": "0px",
+    "gutter": "1rem",
+    "gutter-sm": "0.5rem",
+    "gutter-lg": "1rem",
+    "min-height-input": "2.375rem",
+    "min-height-input-sm": "2.125rem",
+    "min-height-input-lg": "2.875rem",
+    "py-input": "0.375rem",
+    "py-input-sm": "0.375rem",
+    "py-input-lg": "0.625rem",
+    "px-input": "0.75rem",
+    "px-input-sm": "0.5rem",
+    "px-input-lg": "0.875rem",
+    "py-btn": "0.375rem",
+    "py-btn-sm": "0.375rem",
+    "py-btn-lg": "0.625rem",
+    "px-btn": "0.875rem",
+    "px-btn-sm": "0.75rem",
+    "px-btn-lg": "1.25rem",
+    "py-btn-small": "0.25rem",
+    "py-btn-small-sm": "0.25rem",
+    "py-btn-small-lg": "0.375rem",
+    "px-btn-small": "0.625rem",
+    "px-btn-small-sm": "0.625rem",
+    "px-btn-small-lg": "0.75rem",
+    "py-group-tabs": "0.375rem",
+    "py-group-tabs-sm": "0.375rem",
+    "py-group-tabs-lg": "0.625rem",
+    "px-group-tabs": "0.75rem",
+    "px-group-tabs-sm": "0.5rem",
+    "px-group-tabs-lg": "0.875rem",
+    "py-group-blocks": "0.75rem",
+    "py-group-blocks-sm": "0.625rem",
+    "py-group-blocks-lg": "0.875rem",
+    "px-group-blocks": "1rem",
+    "px-group-blocks-sm": "1rem",
+    "px-group-blocks-lg": "1rem",
+    "py-tag": "0px",
+    "py-tag-sm": "0px",
+    "py-tag-lg": "0px",
+    "px-tag": "0.4375rem",
+    "px-tag-sm": "0.4375rem",
+    "px-tag-lg": "0.4375rem",
+    "py-slider-tooltip": "0.125rem",
+    "py-slider-tooltip-sm": "0.0625rem",
+    "py-slider-tooltip-lg": "0.1875rem",
+    "px-slider-tooltip": "0.375rem",
+    "px-slider-tooltip-sm": "0.3125rem",
+    "px-slider-tooltip-lg": "0.5rem",
+    "py-blockquote": "0.25rem",
+    "py-blockquote-sm": "0.25rem",
+    "py-blockquote-lg": "0.25rem",
+    "px-blockquote": "0.75rem",
+    "px-blockquote-sm": "0.75rem",
+    "px-blockquote-lg": "0.75rem",
+    "py-hr": "0.25rem",
+    "space-addon": "0px",
+    "space-addon-sm": "0px",
+    "space-addon-lg": "0px",
+    "space-checkbox": "0.375rem",
+    "space-checkbox-sm": "0.375rem",
+    "space-checkbox-lg": "0.375rem",
+    "space-tags": "0.1875rem",
+    "space-tags-sm": "0.1875rem",
+    "space-tags-lg": "0.1875rem",
+    "space-static-tag-1": "1rem",
+    "space-static-tag-2": "2rem",
+    "space-static-tag-3": "3rem",
+    "floating-top": "0rem",
+    "floating-top-sm": "0rem",
+    "floating-top-lg": "0.6875rem",
+    "bg-input": "#ffffff",
+    "bg-input-hover": "#ffffff",
+    "bg-input-focus": "#ffffff",
+    "bg-input-danger": "#ffffff",
+    "bg-input-success": "#ffffff",
+    "bg-checkbox": "#ffffff",
+    "bg-checkbox-hover": "#ffffff",
+    "bg-checkbox-focus": "#ffffff",
+    "bg-checkbox-danger": "#ffffff",
+    "bg-checkbox-success": "#ffffff",
+    "bg-disabled": "var(--vf-gray-200)",
+    "bg-selected": "#1118270d",
+    "bg-passive": "var(--vf-gray-300)",
+    "bg-icon": "var(--vf-gray-500)",
+    "bg-danger": "var(--vf-danger-lighter)",
+    "bg-success": "var(--vf-success-lighter)",
+    "bg-tag": "var(--vf-primary)",
+    "bg-slider-handle": "var(--vf-primary)",
+    "bg-toggle-handle": "#ffffff",
+    "bg-date-head": "var(--vf-gray-100)",
+    "bg-addon": "#ffffff00",
+    "bg-btn": "var(--vf-primary)",
+    "bg-btn-danger": "var(--vf-danger)",
+    "bg-btn-secondary": "var(--vf-gray-200)",
+    "bg-table-header": "var(--vf-gray-100)",
+    "color-input": "var(--vf-gray-800)",
+    "color-input-hover": "var(--vf-gray-800)",
+    "color-input-focus": "var(--vf-gray-800)",
+    "color-input-danger": "var(--vf-gray-800)",
+    "color-input-success": "var(--vf-gray-800)",
+    "color-disabled": "var(--vf-gray-400)",
+    "color-placeholder": "var(--vf-gray-300)",
+    "color-passive": "var(--vf-gray-700)",
+    "color-muted": "var(--vf-gray-500)",
+    "color-floating": "var(--vf-gray-500)",
+    "color-floating-focus": "var(--vf-gray-500)",
+    "color-floating-success": "var(--vf-gray-500)",
+    "color-floating-danger": "var(--vf-gray-500)",
+    "color-danger": "var(--vf-danger)",
+    "color-success": "var(--vf-success)",
+    "color-tag": "var(--vf-color-on-primary)",
+    "color-addon": "var(--vf-gray-800)",
+    "color-date-head": "var(--vf-gray-700)",
+    "color-btn": "var(--vf-color-on-primary)",
+    "color-btn-danger": "#ffffff",
+    "color-btn-secondary": "var(--vf-gray-700)",
+    "color-table-header": "var(--vf-gray-800)",
+    "border-color-input": "var(--vf-gray-300)",
+    "border-color-input-hover": "var(--vf-gray-300)",
+    "border-color-input-focus": "var(--vf-primary)",
+    "border-color-input-danger": "var(--vf-gray-300)",
+    "border-color-input-success": "var(--vf-gray-300)",
+    "border-color-checkbox": "var(--vf-gray-300)",
+    "border-color-checkbox-focus": "var(--vf-primary)",
+    "border-color-checkbox-hover": "var(--vf-gray-300)",
+    "border-color-checkbox-danger": "var(--vf-gray-300)",
+    "border-color-checkbox-success": "var(--vf-gray-300)",
+    "border-color-checked": "var(--vf-primary)",
+    "border-color-passive": "var(--vf-gray-300)",
+    "border-color-slider-tooltip": "var(--vf-primary)",
+    "border-color-tag": "var(--vf-primary)",
+    "border-color-btn": "var(--vf-primary)",
+    "border-color-btn-danger": "var(--vf-danger)",
+    "border-color-btn-secondary": "var(--vf-gray-200)",
+    "border-color-blockquote": "var(--vf-gray-300)",
+    "border-color-hr": "var(--vf-gray-300)",
+    "border-color-signature-hr": "var(--vf-gray-300)",
+    "border-color-table": "var(--vf-gray-300)",
+    "border-width-input-t": "1px",
+    "border-width-input-r": "1px",
+    "border-width-input-b": "1px",
+    "border-width-input-l": "1px",
+    "border-width-radio-t": "1px",
+    "border-width-radio-r": "1px",
+    "border-width-radio-b": "1px",
+    "border-width-radio-l": "1px",
+    "border-width-checkbox-t": "1px",
+    "border-width-checkbox-r": "1px",
+    "border-width-checkbox-b": "1px",
+    "border-width-checkbox-l": "1px",
+    "border-width-dropdown": "1px",
+    "border-width-btn": "1px",
+    "border-width-toggle": "0.125rem",
+    "border-width-tag": "1px",
+    "border-width-blockquote": "3px",
+    "border-width-table": "1px",
+    "shadow-input": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-input-hover": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-input-focus": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-handles": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-handles-hover": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-handles-focus": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-btn": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "shadow-dropdown": "0px 0px 0px 0px rgba(0,0,0,0)",
+    "radius-input": "0.25rem",
+    "radius-input-sm": "0.25rem",
+    "radius-input-lg": "0.25rem",
+    "radius-btn": "0.25rem",
+    "radius-btn-sm": "0.25rem",
+    "radius-btn-lg": "0.25rem",
+    "radius-small": "0.25rem",
+    "radius-small-sm": "0.25rem",
+    "radius-small-lg": "0.25rem",
+    "radius-large": "0.25rem",
+    "radius-large-sm": "0.25rem",
+    "radius-large-lg": "0.25rem",
+    "radius-tag": "0.25rem",
+    "radius-tag-sm": "0.25rem",
+    "radius-tag-lg": "0.25rem",
+    "radius-checkbox": "0.25rem",
+    "radius-checkbox-sm": "0.25rem",
+    "radius-checkbox-lg": "0.25rem",
+    "radius-slider": "0.25rem",
+    "radius-slider-sm": "0.25rem",
+    "radius-slider-lg": "0.25rem",
+    "radius-image": "0.25rem",
+    "radius-image-sm": "0.25rem",
+    "radius-image-lg": "0.25rem",
+    "radius-gallery": "0.25rem",
+    "radius-gallery-sm": "0.25rem",
+    "radius-gallery-lg": "0.25rem",
+    "checkbox-size": "1rem",
+    "checkbox-size-sm": "0.875rem",
+    "checkbox-size-lg": "1rem",
+    "gallery-size": "6rem",
+    "gallery-size-sm": "5rem",
+    "gallery-size-lg": "7rem",
+    "toggle-width": "3rem",
+    "toggle-width-sm": "2.75rem",
+    "toggle-width-lg": "3rem",
+    "toggle-height": "1.25rem",
+    "toggle-height-sm": "1rem",
+    "toggle-height-lg": "1.25rem",
+    "slider-height": "0.375rem",
+    "slider-height-sm": "0.3125rem",
+    "slider-height-lg": "0.5rem",
+    "slider-height-vertical": "20rem",
+    "slider-height-vertical-sm": "20rem",
+    "slider-height-vertical-lg": "20rem",
+    "slider-handle-size": "1rem",
+    "slider-handle-size-sm": "0.875rem",
+    "slider-handle-size-lg": "1.25rem",
+    "slider-tooltip-distance": "0.5rem",
+    "slider-tooltip-distance-sm": "0.375rem",
+    "slider-tooltip-distance-lg": "0.5rem",
+    "slider-tooltip-arrow-size": "0.3125rem",
+    "slider-tooltip-arrow-size-sm": "0.3125rem",
+    "slider-tooltip-arrow-size-lg": "0.3125rem"
+  }
+}
