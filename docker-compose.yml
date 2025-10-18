@@ -1,0 +1,20 @@
+services:
+  database:
+    container_name: database-dev
+    image: postgis/postgis:18-3.6-alpine
+    ports:
+      - "3005:5432"
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD} # superuser password
+      - POSTGRES_USER=${DB_USERNAME} # create the specified user with superuser power and a database with the same name if no POSTGRES_DB is specified
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+volumes:
+  db-data:
