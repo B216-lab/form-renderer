@@ -76,3 +76,12 @@ export enum Transport {
   CITY_BIKE_RENTAL = "городской велопрокат",
   SERVICE = "служебный транспорт",
 }
+
+export function enumToOptions<T extends { [key: string]: string }>(
+  inputEnum: T
+): { value: string; label: string }[] {
+  return Object.entries(inputEnum).map(([key, value]) => ({
+    value: key,
+    label: value,
+  }));
+}
