@@ -1,6 +1,7 @@
 # Apache Superset Docker image with PostgreSQL driver
 
 ```bash
+echo "SECRET_KEY = '$(openssl rand -base64 42)'" > superset_config.py
 docker build -t mysuperset:latest .
 ```
 
