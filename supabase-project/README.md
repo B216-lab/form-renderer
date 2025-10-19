@@ -1,4 +1,6 @@
 # Supabase Docker
+Supabase - это fauxpen source на самом деле в какой-то незначительной (зависит от случая) мере, поэтому, очень вероятно, надо будет от него избавляться, переходя
+на что-то написанное вручную, но на данный момент supabase - достаточное решение, которое "пойдёт".
 
 - [Supabase hosting docs](https://supabase.com/docs/guides/hosting/docker)
 
