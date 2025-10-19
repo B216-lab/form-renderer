@@ -1,0 +1,36 @@
+services:
+  database:
+    container_name: apache-superset-metadata
+    image: postgres
+    ports:
+      - "3008:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  umrs-superset:
+    container_name: umrs-superset
+    image:
+      build:
+        context: .
+        dockerfile: Dockerfile
+    # https://superset.apache.org/docs/configuration/configuring-superset/#superset_configpy
+    # environment:
+    #   - SUPERSET_CONFIG_PATH=/app/superset_config.py
+    # volumes:
+    #   - ./superset_config.py:/app/superset_config.py
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8088/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
