@@ -1,5 +1,5 @@
 # Сервис отображения форм
-
+В то же время сразу для удобства содержит связанные [Supabase](./supabase-project/) и [Apache Superset](./apache-superset-project/) 
 
 - [VueForm documentation](https://vueform.com/docs/installation)
 - [Vueform Builder](https://builder.vueform.com/)
