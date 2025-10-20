@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import './style.css'
-import './style.scss'
 import App from './App.vue'
 import Vueform from '@vueform/vueform'
 import vueformConfig from './../vueform.config'

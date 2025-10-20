@@ -349,4 +349,16 @@ const data = computed({
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3)
 </script>
 
-<style src="./style.css"></style>
+<style lang="scss">
+@import '@vueform/vueform/themes/vueform/scss/index.scss';
+
+@media (prefers-color-scheme: dark) {
+
+  :root,
+  :before,
+  :after,
+  * {
+    @include vf-dark-vars;
+  }
+}
+</style>

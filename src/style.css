@@ -1,11 +1,25 @@
 body {
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
 }
 
 #app {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  border-radius: 10px;
+  position: relative;
+}
+
+#app.dark {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+
+:root {
+  font-family: Source Sans Pro, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
 }
