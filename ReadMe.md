@@ -22,3 +22,10 @@ cd supabase-project
 docker compose pull
 docker compose up -d
 ```
+
+Run superset:
+```bash
+cd apache-superset-project
+
+docker compose up -d --build
+```
