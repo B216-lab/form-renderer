@@ -1,0 +1,1 @@
+- [Open Layers Snap interaction](https://openlayers.org/en/latest/examples/snap.html)
