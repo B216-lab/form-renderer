@@ -1,11 +1,16 @@
 body {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 0;
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   position: relative;
 }
 
 #app {
+  margin: 10px;
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
@@ -18,6 +23,10 @@ body {
   color: #fff;
 }
 
+body.dark {
+  background-color: #080808;
+  color: #fff;
+}
 
 :root {
   font-family: Source Sans Pro, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
