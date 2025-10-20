@@ -1,5 +1,5 @@
 # or master for the latest
-FROM apache/superset:6.0.0
+FROM apache/superset:5.0.0
 
 USER root
 
@@ -15,7 +15,10 @@ RUN . /app/.venv/bin/activate && \
     # Authlib \
     #
     # openpyxl to be able to upload Excel files
-    openpyxl
+    openpyxl \
+    
+    # Pillow for Alerts & Reports to generate PDFs of dashboards
+    Pillow
 
 
 # Switch back to the superset user
