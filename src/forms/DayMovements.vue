@@ -90,7 +90,7 @@
           'required',
         ]" field-name="date_id" :columns="{
           container: 6,
-        }" />
+        }" description="Нужно будет описать передвижения за этот день" />
         <SelectElement name="financialSituation" :items="[
           {
             value: 0,
