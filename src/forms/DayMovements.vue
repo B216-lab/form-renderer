@@ -129,7 +129,7 @@
           :filter-results="false"
           input-type="search"
           autocomplete="off"
-          :rules="['required']"
+          :rules="['required', precise]"
         />
         <DateElement
           name="dateMovements"
@@ -455,16 +455,25 @@ import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
 import { Gender } from './enums';
 import { Validator } from '@vueform/vueform';
+import type { DaDataAddress } from 'react-dadata';
 
-// const precise = class extends Validator {
-//   check(value) {
-//     console.log('HELLLLLOO');
-//     console.log(value);
-//     if (!value || typeof value !== 'object' || !('house' in value)) {
-//       return this.reject('Адрес должен содержать номер дома');
-//     }
-//   }
-// };
+const precise = class extends Validator {
+  check(value: DaDataAddress | null) {
+    console.log(value);
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      !('house' in value) ||
+      !value.house
+    ) {
+      return false;
+    }
+    return true;
+  }
+  get msg() {
+    return 'Адрес должен содержать номер дома';
+  }
+};
 
 const prepare = (form$: Vueform) => {
   // TODO add enhanced home address validation: it has to be house or apartment address
