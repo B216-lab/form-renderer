@@ -1,5 +1,17 @@
 <template>
+  <div
+    v-if="isSubmitted"
+    class="thank-you-screen"
+  >
+    <div class="thank-you-content">
+      <h1 class="thank-you-title">Спасибо!</h1>
+      <p class="thank-you-message">
+        Ваша форма успешно отправлена. Мы благодарим вас за участие в опросе.
+      </p>
+    </div>
+  </div>
   <Vueform
+    v-else
     ref="form$"
     :prepare="prepare"
     validate-on="change"
@@ -10,6 +22,7 @@
     add-class="vf-create-account"
     endpoint="http://localhost:8081/api/v1/public/forms/movements"
     method="post"
+    @success="handleSuccess"
   >
     <template #empty>
       <FormSteps>
@@ -451,7 +464,7 @@
 
 <script setup lang="ts">
 import { useDaDataAddress } from '@/daDataService/useDaDataAddress';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useFormsStore } from '@/forms/formDataStore';
 import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
@@ -490,6 +503,12 @@ const data = computed({
 });
 
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
+
+const isSubmitted = ref(false);
+
+const handleSuccess = () => {
+  isSubmitted.value = true;
+};
 </script>
 
 <style lang="scss">
@@ -501,6 +520,51 @@ const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
   :after,
   * {
     @include vf-dark-vars;
+  }
+}
+
+.thank-you-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--vf-color-bg, #ffffff);
+}
+
+.thank-you-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 3rem;
+  background: var(--vf-color-bg-secondary, #f8f9fa);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.thank-you-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--vf-color-text, #212529);
+}
+
+.thank-you-message {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--vf-color-text-secondary, #6c757d);
+}
+
+@media (prefers-color-scheme: dark) {
+  .thank-you-content {
+    background: var(--vf-color-bg-secondary, #1a1a1a);
+  }
+
+  .thank-you-title {
+    color: var(--vf-color-text, #ffffff);
+  }
+
+  .thank-you-message {
+    color: var(--vf-color-text-secondary, #adb5bd);
   }
 }
 </style>
