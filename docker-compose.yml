@@ -1,20 +1,19 @@
 services:
-  database:
-    container_name: database-dev
-    image: postgis/postgis:18-3.6-alpine
-    ports:
-      - "3005:5432"
+  frontend:
+    container_name: geoform-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: production
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD} # superuser password
-      - POSTGRES_USER=${DB_USERNAME} # create the specified user with superuser power and a database with the same name if no POSTGRES_DB is specified
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - NODE_ENV=production
+    ports:
+      - "4173:4173"
+    restart: unless-stopped
+    networks:
+      - shared-external
 
-
-volumes:
-  db-data:
+networks:
+  shared-external:
+    external: true

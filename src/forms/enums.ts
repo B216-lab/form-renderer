@@ -19,29 +19,6 @@ export enum SocialStatus {
   TEMPORARILY_UNEMPLOYED = "временно нетрудящийся (декретный отпуск, отпуск по уходу за ребенком)",
 }
 
-export enum FinancialSituation {
-  UP_TO_10_THOUSAND = "до 10 тысяч рублей",
-  FROM_10_TO_25_THOUSAND = "от 10 до 25 тысяч рублей",
-  FROM_25_TO_35_THOUSAND = "от 25 до 35 тысяч рублей",
-  FROM_35_TO_45_THOUSAND = "от 35 до 45 тысяч рублей",
-  FROM_45_TO_65_THOUSAND = "от 45 до 65 тысяч рублей",
-  FROM_65_TO_90_THOUSAND = "от 65 до 90 тысяч рублей",
-  FROM_90_TO_120_THOUSAND = "от 90 до 120 тысяч рублей",
-  ABOVE_120_THOUSAND = "от 120 тысяч рублей и выше",
-  NO_INCOME = "нет заработка",
-}
-
-export enum TransportationCosts {
-  LESS_THAN_1000 = "менее 1000",
-  FROM_1000_TO_2000 = "1000-2000",
-  FROM_2000_TO_3000 = "2000-3000",
-  FROM_3000_TO_5000 = "3000-5000",
-  FROM_5000_TO_7000 = "5000-7000",
-  FROM_7000_TO_10000 = "7000-10 000",
-  ABOVE_10000 = "более 10 000",
-  NO_EXPENSES = "ничего не трачу",
-}
-
 export enum Place {
   HOME_RESIDENCE = "дом - место жительства",
   FRIENDS_RELATIVES_HOME = "дом друзей / родственников",

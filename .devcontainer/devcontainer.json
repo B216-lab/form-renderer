@@ -1,0 +1,42 @@
+{
+  "name": "manual-geoform",
+  "build": {
+    "dockerfile": "docker/dev.Dockerfile",
+    "context": "..",
+    "args": {
+      "NODE_VERSION": "23.8.0",
+      "PNPM_VERSION": "10.13.1",
+      "GIT_VERSION": "1:2.30.2-1+deb11u2",
+      "DUMB_INIT_VERSION": "1.2.5-1"
+    }
+  },
+  "workspaceFolder": "/workspace",
+  "overrideCommand": true,
+  "runArgs": ["--init", "--network", "shared-external"],
+  "remoteUser": "node",
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "PNPM_HOME": "/opt/pnpm",
+    "PNPM_STORE_PATH": "/pnpm-store",
+    "CHOKIDAR_USEPOLLING": "true"
+  },
+  "mounts": [
+    "source=manual-geoform-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=manual-geoform-pnpm-store,target=/pnpm-store,type=volume"
+  ],
+  "postCreateCommand": "pnpm install --frozen-lockfile",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar",
+        "Vue.vscode-typescript-vue-plugin",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ],
+      "settings": {
+        "editor.formatOnSave": true
+      }
+    }
+  }
+}
+
