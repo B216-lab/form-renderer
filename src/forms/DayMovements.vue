@@ -8,6 +8,8 @@
     size="md"
     :display-errors="false"
     add-class="vf-create-account"
+    endpoint="http://localhost:8081/api/v1/public/forms/movements"
+    method="post"
   >
     <template #empty>
       <FormSteps>
