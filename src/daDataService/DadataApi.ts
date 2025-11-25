@@ -22,12 +22,13 @@ export const createDaDataInstance = async <T>(
   options?: AxiosRequestConfig,
 ): Promise<T> => {
   try {
-    const response: AxiosResponse = await apiDaDataInstance({
+    const mergedConfig = {
       ...config,
       ...options,
-    });
+    };
+    const response: AxiosResponse = await apiDaDataInstance(mergedConfig);
 
-    logger.debug('[DaDataAPI] Response received', { url: config.url, status: response.status })
+    logger.debug('[DaDataAPI] Response received', { url: response.config.url || mergedConfig.url, status: response.status })
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -126,6 +126,7 @@
           :search="true"
           :native="false"
           label="Адрес проживания"
+          :filter-results="false"
           input-type="search"
           autocomplete="off"
           :rules="['required']"
@@ -455,15 +456,15 @@ import { enumToOptions } from './enums';
 import { Gender } from './enums';
 import { Validator } from '@vueform/vueform';
 
-const precise = class extends Validator {
-  check(value) {
-    console.log('HELLLLLOO');
-    console.log(value);
-    if (!value || typeof value !== 'object' || !('house' in value)) {
-      return this.reject('Адрес должен содержать номер дома');
-    }
-  }
-};
+// const precise = class extends Validator {
+//   check(value) {
+//     console.log('HELLLLLOO');
+//     console.log(value);
+//     if (!value || typeof value !== 'object' || !('house' in value)) {
+//       return this.reject('Адрес должен содержать номер дома');
+//     }
+//   }
+// };
 
 const prepare = (form$: Vueform) => {
   // TODO add enhanced home address validation: it has to be house or apartment address

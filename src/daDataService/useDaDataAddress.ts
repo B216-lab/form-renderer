@@ -15,6 +15,8 @@ const DEFAULT_MIN_CHARS = 3
 export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
   // Использует AbortController для отмены предыдущих запросов при новом вводе
   const abortControllerRef = ref<AbortController | null>(null)
+  // Отслеживает текущий запрос для предотвращения race condition
+  const currentQueryRef = ref<string | null>(null)
 
   /**
    * Получает элементы подсказок адреса для SelectElement
@@ -32,6 +34,7 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
 
     const controller = new AbortController()
     abortControllerRef.value = controller
+    currentQueryRef.value = searchQuery
     logger.verbose('[DaData] New AbortController created')
 
     if (!searchQuery || searchQuery.trim().length < minChars) {
@@ -42,16 +45,23 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
     try {
       logger.debug('[DaData] Fetching suggestions...', { query: searchQuery })
       const { suggestions } = await fetchDaDataSuggestionsAddress(controller.signal, { query: searchQuery })
+      
+      // Проверяет, что запрос не был отменен и это все еще актуальный запрос
+      if (controller.signal.aborted || currentQueryRef.value !== searchQuery) {
+        logger.debug('[DaData] Request outdated, ignoring results')
+        return []
+      }
+      
       const count = suggestions?.length ?? 0
       logger.info('[DaData] Suggestions received', { count })
-      logger.verbose('[DaData] Suggestions payload', suggestions)
+      console.log('[DaData] Suggestions payload', suggestions)
       return (suggestions ?? []).map((s: DaDataSuggestion<DaDataAddress>) => ({
         value: s.data,
         label: s.value,
       }))
     } catch (err) {
-      if (controller.signal.aborted) {
-        logger.warn('[DaData] Request aborted')
+      if (controller.signal.aborted || currentQueryRef.value !== searchQuery) {
+        logger.warn('[DaData] Request aborted or outdated')
         return []
       }
       logger.error('[DaData] Error while fetching suggestions', err)
