@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
-FROM node:23.8.0-bullseye-slim
+FROM node:25-bullseye-slim
 
 ENV NODE_ENV=production
-
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml* ./
 
-RUN corepack enable && corepack prepare pnpm@10.13.1 --activate
-
-RUN pnpm install --frozen-lockfile
+RUN npm install -g corepack; \
+    corepack enable; \
+    corepack install; \
+    pnpm install --frozen-lockfile;
 
 COPY . .
 

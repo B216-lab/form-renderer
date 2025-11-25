@@ -4,10 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        BUILD_ENV: production
-    environment:
-      - NODE_ENV=production
     ports:
       - "4173:4173"
     restart: unless-stopped
