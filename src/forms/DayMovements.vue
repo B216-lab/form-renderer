@@ -87,24 +87,7 @@
           :native="false"
           label="Социальное положение"
           :caret="false"
-          :items="[
-            {
-              value: 'RETIRED',
-              label: 'Пенсионер',
-            },
-            {
-              value: 'STUDENT',
-              label: 'Студент',
-            },
-            {
-              value: 'PUPIL',
-              label: 'Школьник',
-            },
-            {
-              value: 'WORKER',
-              label: 'Работающий',
-            },
-          ]"
+          :items="enumToOptions(SocialStatus)"
           :rules="['required']"
           :columns="{
             container: 6,
@@ -211,39 +194,13 @@
                 <RadiogroupElement
                   name="typeMovement"
                   view="tabs"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Пешком',
-                    },
-                    {
-                      value: 1,
-                      label: 'Транспорт',
-                    },
-                  ]"
+                  :items="enumToOptions(TypeMovement)"
                   :rules="['required']"
                 />
                 <MultiselectElement
                   name="transport"
                   :close-on-select="false"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Велосипед',
-                    },
-                    {
-                      value: '1',
-                      label: 'Автобус',
-                    },
-                    {
-                      value: '2',
-                      label: 'Трамвай',
-                    },
-                    {
-                      value: '3',
-                      label: 'Каршеринг',
-                    },
-                  ]"
+                  :items="enumToOptions(Transport)"
                   :search="true"
                   :native="false"
                   label="Тип транспорта"
@@ -251,7 +208,7 @@
                   autocomplete="off"
                   :rules="['required', 'min:1']"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <TextElement
@@ -268,7 +225,7 @@
                   label="Количество людей в автомобиле"
                   :force-numbers="true"
                   :conditions="[
-                    ['movements.*.container.transport', 'in', ['3']],
+                    ['movements.*.container.transport', 'in', ['CAR_SHARING']],
                   ]"
                   default="1"
                 />
@@ -286,7 +243,7 @@
                   label="Время пешего пути к начальной остановке / парковке (в минутах)"
                   :force-numbers="true"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <TextElement
@@ -303,7 +260,7 @@
                   label="Время ожидания транспорта на начальной остановке (в минутах)"
                   :force-numbers="true"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <TextElement
@@ -315,7 +272,7 @@
                   :force-numbers="true"
                   default="0"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <TextElement
@@ -338,16 +295,7 @@
                 />
                 <SelectElement
                   name="departurePlace"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Дом - место жительства',
-                    },
-                    {
-                      value: null,
-                      label: 'Дом друзей или родственников',
-                    },
-                  ]"
+                  :items="enumToOptions(Place)"
                   :search="true"
                   :native="false"
                   label="Пункт отправления"
@@ -388,16 +336,7 @@
                 />
                 <SelectElement
                   name="arrivalPlace"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Дом - место жительства',
-                    },
-                    {
-                      value: null,
-                      label: 'Дом друзей или родственников',
-                    },
-                  ]"
+                  :items="enumToOptions(Place)"
                   :search="true"
                   :native="false"
                   label="Пункт прибытия"
@@ -415,7 +354,7 @@
                   autocomplete="off"
                   label="Время пешего хода от конечной остановки / парковки до места прибытия (в минутах)"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <TextElement
@@ -425,7 +364,7 @@
                   autocomplete="off"
                   label="Стоимость поездки / парковки"
                   :conditions="[
-                    ['movements.*.container.typeMovement', 'in', [1]],
+                    ['movements.*.container.typeMovement', 'in', ['TRANSPORT']],
                   ]"
                 />
                 <SelectElement
@@ -468,7 +407,7 @@ import { computed, ref } from 'vue';
 import { useFormsStore } from '@/forms/formDataStore';
 import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
-import { Gender } from './enums';
+import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
 import { Validator } from '@vueform/vueform';
 import type { DaDataAddress } from 'react-dadata';
 
