@@ -417,8 +417,13 @@ onMounted(async () => {
 
   const data = localStorage.getItem('form');
   if (data) {
-    await form$.value.load(JSON.parse(data));
-    form$.value.clean();
+    try {
+      await form$.value.load(JSON.parse(data));
+      form$.value.clean();
+    } catch (error) {
+      // If loading fails (bad data), remove invalid saved form
+      localStorage.removeItem('form');
+    }
   }
 });
 
