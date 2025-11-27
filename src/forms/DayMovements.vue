@@ -34,7 +34,6 @@
             'socialStatus',
             'transportationCosts',
             'coordinatesAddress',
-            'dateMovements',
             'financialSituation',
             'baseComment',
           ]"
@@ -370,7 +369,7 @@
 
 <script setup lang="ts">
 import { useDaDataAddress } from '@/daDataService/useDaDataAddress';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useFormsStore } from '@/forms/formDataStore';
 import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
@@ -406,6 +405,21 @@ const store = useFormsStore();
 const data = computed({
   get: () => store.form,
   set: (data) => (store.form = data),
+});
+
+const form$ = ref(null);
+onMounted(async () => {
+  form$.value.on('change', (e) => {
+    if (form$.value) {
+      localStorage.setItem('form', JSON.stringify(form$.value.data));
+    }
+  });
+
+  const data = localStorage.getItem('form');
+  if (data) {
+    await form$.value.load(JSON.parse(data));
+    form$.value.clean();
+  }
 });
 
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
