@@ -48,7 +48,7 @@
         />
         <FormStep
           name="page1"
-          :elements="['h1', 'html', 'divider', 'movements']"
+          :elements="['html', 'dateMovements', 'movements']"
           label="Передвижения"
           :labels="{
             previous: 'Назад',
@@ -89,33 +89,20 @@
           :caret="false"
           :items="enumToOptions(SocialStatus)"
           :rules="['required']"
-          :columns="{
-            container: 6,
-          }"
         />
-        <SelectElement
+        <SliderElement
           name="transportationCosts"
-          :items="[
-            {
-              value: 'LESS1000',
-              label: 'Менее 1000',
-            },
-            {
-              value: '10002000',
-              label: '1000-2000',
-            },
-            {
-              value: '20003000',
-              label: '2000-3000',
-            },
-          ]"
-          :native="false"
+          :default="[0, 3000]"
           label="Затраты на транспорт"
-          :caret="false"
-          :rules="['required']"
-          :columns="{
-            container: 6,
+          :min="0"
+          :max="20000"
+          :step="100"
+          show-tooltip="focus"
+          :format="{
+            suffix: ' ₽',
           }"
+          :rules="['required']"
+          description="Указать диапазон затрат. Сдвинуть один ползунок при фиксированном значении."
         />
         <SelectElement
           name="coordinatesAddress"
@@ -130,33 +117,19 @@
           :description="ADDRESS_SUGGESTION_HINT"
           :rules="['required', precise]"
         />
-        <DateElement
-          name="dateMovements"
-          label="Дата передвижений"
-          :rules="['required']"
-          field-name="date_id"
-          :columns="{
-            container: 6,
-          }"
-          description="Нужно будет описать передвижения за этот день"
-        />
-        <SelectElement
+        <SliderElement
           name="financialSituation"
-          :items="[
-            {
-              value: 0,
-              label: 'Label',
-            },
-          ]"
-          :search="true"
-          :native="false"
-          input-type="search"
-          autocomplete="off"
+          :default="[0, 50000]"
           label="Ежемесячный доход"
-          :columns="{
-            container: 6,
+          :min="0"
+          show-tooltip="focus"
+          :max="250000"
+          :step="5000"
+          :format="{
+            suffix: ' ₽',
           }"
           :rules="['required']"
+          description="Минимум и максимум. Установить в одно положение при фиксированном доходе."
         />
         <TextareaElement
           name="baseComment"
@@ -168,6 +141,13 @@
           content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
           :expressions="true"
           add-class="info-callout"
+        />
+        <DateElement
+          name="dateMovements"
+          label="Дата всех передвижений, описываемых далее в форме"
+          :rules="['required']"
+          field-name="date_id"
+          description="Нужно будет описать передвижения за этот день"
         />
         <ListElement
           name="movements"
@@ -182,6 +162,7 @@
                 <RadiogroupElement
                   name="typeMovement"
                   view="tabs"
+                  default="ON_FOOT"
                   :items="enumToOptions(TypeMovement)"
                   :rules="['required']"
                 />
