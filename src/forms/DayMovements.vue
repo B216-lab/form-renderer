@@ -127,6 +127,7 @@
           :filter-results="false"
           input-type="search"
           autocomplete="off"
+          :description="ADDRESS_SUGGESTION_HINT"
           :rules="['required', precise]"
         />
         <DateElement
@@ -308,17 +309,16 @@
                 />
                 <SelectElement
                   name="coordinatesDepartureAddress"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Label',
-                    },
-                  ]"
+                  :items="getAddressItems"
+                  :delay="ADDRESS_DELAY"
                   :search="true"
                   :native="false"
+                  :filter-results="false"
                   label="Адрес отправления"
                   input-type="search"
                   autocomplete="off"
+                  :description="ADDRESS_SUGGESTION_HINT"
+                  :rules="['required', precise]"
                 />
                 <StaticElement
                   name="divider_1"
@@ -369,17 +369,16 @@
                 />
                 <SelectElement
                   name="coordinatesArrivalAddress"
-                  :items="[
-                    {
-                      value: 0,
-                      label: 'Label',
-                    },
-                  ]"
+                  :items="getAddressItems"
+                  :delay="ADDRESS_DELAY"
                   :search="true"
                   :native="false"
+                  :filter-results="false"
                   input-type="search"
                   autocomplete="off"
                   label="Адрес прибытия"
+                  :description="ADDRESS_SUGGESTION_HINT"
+                  :rules="['required', precise]"
                 />
                 <StaticElement
                   name="divider_2"
@@ -444,6 +443,8 @@ const data = computed({
 const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
 
 const isSubmitted = ref(false);
+const ADDRESS_SUGGESTION_HINT =
+  'Начните вводить адрес, чтобы увидеть подсказки и выбрать нужный вариант. Необходимо выбрать из списка';
 
 const handleSuccess = () => {
   isSubmitted.value = true;
