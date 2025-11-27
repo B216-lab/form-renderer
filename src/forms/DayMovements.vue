@@ -1,15 +1,5 @@
 <template>
-  <div
-    v-if="isSubmitted"
-    class="thank-you-screen"
-  >
-    <div class="thank-you-content">
-      <h1 class="thank-you-title">Спасибо!</h1>
-      <p class="thank-you-message">
-        Ваша форма успешно отправлена. Мы благодарим вас за участие в опросе.
-      </p>
-    </div>
-  </div>
+  <SuccessScreen v-if="isSubmitted" />
   <Vueform
     v-else
     ref="form$"
@@ -412,6 +402,7 @@ import { enumToOptions } from './enums';
 import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
 import { Validator } from '@vueform/vueform';
 import type { DaDataAddressSuggestion } from 'react-dadata';
+import SuccessScreen from '@/components/SuccessScreen.vue';
 
 const precise = class extends Validator {
   check(suggestion: DaDataAddressSuggestion | null) {
@@ -450,15 +441,23 @@ onMounted(async () => {
     }
   });
 
-  const data = localStorage.getItem('form');
+  const data: string | null = localStorage.getItem('form');
   if (data) {
     try {
       await form$.value.load(JSON.parse(data));
       form$.value.clean();
-    } catch (error) {
+    } catch {
       // If loading fails (bad data), remove invalid saved form
       localStorage.removeItem('form');
     }
+  } else if (import.meta.env.DEV) {
+    // If we are in dev environment and there's no saved form, optionally seed with test data
+    // For now, just log for dev
+    const testData =
+      '{"age":22,"gender":"MALE","socialStatus":"PENSIONER","transportationCosts":[0,3000],"coordinatesAddress":{"value":"Саратовская обл, г Энгельс, ул Байкальская, д 98","unrestricted_value":"413112, Саратовская обл, г Энгельс, ул Байкальская, д 98","data":{"postal_code":"413112","country":"Россия","country_iso_code":"RU","federal_district":"Приволжский","region_fias_id":"df594e0e-a935-4664-9d26-0bae13f904fe","region_kladr_id":"6400000000000","region_iso_code":"RU-SAR","region_with_type":"Саратовская обл","region_type":"обл","region_type_full":"область","region":"Саратовская","area_fias_id":null,"area_kladr_id":null,"area_with_type":null,"area_type":null,"area_type_full":null,"area":null,"city_fias_id":"c58d0505-54eb-4c34-8216-b14f7cdb0ecb","city_kladr_id":"6400001300000","city_with_type":"г Энгельс","city_type":"г","city_type_full":"город","city":"Энгельс","city_area":null,"city_district_fias_id":null,"city_district_kladr_id":null,"city_district_with_type":null,"city_district_type":null,"city_district_type_full":null,"city_district":null,"settlement_fias_id":null,"settlement_kladr_id":null,"settlement_with_type":null,"settlement_type":null,"settlement_type_full":null,"settlement":null,"street_fias_id":"bdc00cf0-a061-472e-aaae-056a2c85e2d8","street_kladr_id":"64000013000001000","street_with_type":"ул Байкальская","street_type":"ул","street_type_full":"улица","street":"Байкальская","stead_fias_id":null,"stead_cadnum":null,"stead_type":null,"stead_type_full":null,"stead":null,"house_fias_id":"51304840-19aa-4d2f-93a1-e6ea0215e8cb","house_kladr_id":"6400001300000100098","house_cadnum":null,"house_flat_count":null,"house_type":"д","house_type_full":"дом","house":"98","block_type":null,"block_type_full":null,"block":null,"entrance":null,"floor":null,"flat_fias_id":null,"flat_cadnum":null,"flat_type":null,"flat_type_full":null,"flat":null,"flat_area":null,"square_meter_price":null,"flat_price":null,"room_fias_id":null,"room_cadnum":null,"room_type":null,"room_type_full":null,"room":null,"postal_box":null,"fias_id":"51304840-19aa-4d2f-93a1-e6ea0215e8cb","fias_code":null,"fias_level":"8","fias_actuality_state":"0","kladr_id":"6400001300000100098","geoname_id":"563464","capital_marker":"0","okato":"63250501000","oktmo":"63650101001","tax_office":"6449","tax_office_legal":"6449","timezone":null,"geo_lat":"51.4470576","geo_lon":"46.0841895","beltway_hit":null,"beltway_distance":null,"metro":null,"divisions":null,"qc_geo":"0","qc_complete":null,"qc_house":null,"history_values":null,"unparsed_parts":null,"source":null,"qc":null}},"financialSituation":[65000,145000],"baseComment":null,"dateMovements":"2025-11-12","movements":[{"typeMovement":"ON_FOOT","transport":[],"numberPeopleInCar":1,"pedestrianApproachtoStartingStopOrParkingLot":null,"waitingTimeForTransport":null,"numberOfTransfers":0,"waitingTimeBetweenTransfers":"5","departureTime":"12:30","departurePlace":"HOME_RESIDENCE","coordinatesDepartureAddress":null,"arrivalTime":"15:00","arrivalPlace":"FRIENDS_RELATIVES_HOME","pedestrianApproachFromFinalStopOrParking":null,"number":null,"coordinatesArrivalAddress":{"value":"г Саратов, тер СНТ Хлеб-Клещевка, д 5","unrestricted_value":"410531, Саратовская обл, г Саратов, тер СНТ Хлеб-Клещевка, д 5","data":{"postal_code":"410531","country":"Россия","country_iso_code":"RU","federal_district":"Приволжский","region_fias_id":"df594e0e-a935-4664-9d26-0bae13f904fe","region_kladr_id":"6400000000000","region_iso_code":"RU-SAR","region_with_type":"Саратовская обл","region_type":"обл","region_type_full":"область","region":"Саратовская","area_fias_id":null,"area_kladr_id":null,"area_with_type":null,"area_type":null,"area_type_full":null,"area":null,"city_fias_id":"bf465fda-7834-47d5-986b-ccdb584a85a6","city_kladr_id":"6400000100000","city_with_type":"г Саратов","city_type":"г","city_type_full":"город","city":"Саратов","city_area":null,"city_district_fias_id":null,"city_district_kladr_id":null,"city_district_with_type":null,"city_district_type":null,"city_district_type_full":null,"city_district":null,"settlement_fias_id":"fb51926a-4af4-4f94-ad11-27b7d18a0c0d","settlement_kladr_id":"64000001000261200","settlement_with_type":"тер СНТ Хлеб-Клещевка","settlement_type":"тер","settlement_type_full":"территория","settlement":"СНТ Хлеб-Клещевка","street_fias_id":null,"street_kladr_id":null,"street_with_type":null,"street_type":null,"street_type_full":null,"street":null,"stead_fias_id":null,"stead_cadnum":null,"stead_type":null,"stead_type_full":null,"stead":null,"house_fias_id":"f5aea59e-bb2d-421c-b524-5350d8b62898","house_kladr_id":"6400000100026120028","house_cadnum":null,"house_flat_count":null,"house_type":"д","house_type_full":"дом","house":"5","block_type":null,"block_type_full":null,"block":null,"entrance":null,"floor":null,"flat_fias_id":null,"flat_cadnum":null,"flat_type":null,"flat_type_full":null,"flat":null,"flat_area":null,"square_meter_price":null,"flat_price":null,"room_fias_id":null,"room_cadnum":null,"room_type":null,"room_type_full":null,"room":null,"postal_box":null,"fias_id":"f5aea59e-bb2d-421c-b524-5350d8b62898","fias_code":null,"fias_level":"8","fias_actuality_state":"0","kladr_id":"6400000100026120028","geoname_id":"498677","capital_marker":"2","okato":"63201000000","oktmo":"63701000","tax_office":"6432","tax_office_legal":"6432","timezone":null,"geo_lat":"51.533557","geo_lon":"46.034257","beltway_hit":null,"beltway_distance":null,"metro":null,"divisions":null,"qc_geo":"4","qc_complete":null,"qc_house":null,"history_values":["тер СНТ Хлеб"],"unparsed_parts":null,"source":null,"qc":null}},"textarea":null}]}';
+    await form$.value.load(JSON.parse(testData));
+    form$.value.clean();
+    console.log('Dev environment detected. No saved form loaded.');
   }
 });
 
@@ -484,37 +483,6 @@ const handleSuccess = () => {
   * {
     @include vf-dark-vars;
   }
-}
-
-.thank-you-screen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--vf-color-bg, #ffffff);
-}
-
-.thank-you-content {
-  text-align: center;
-  max-width: 600px;
-  padding: 3rem;
-  background: var(--vf-color-bg-secondary, #f8f9fa);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.thank-you-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--vf-color-text, #212529);
-}
-
-.thank-you-message {
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: var(--vf-color-text-secondary, #6c757d);
 }
 
 .info-callout {
@@ -551,18 +519,6 @@ const handleSuccess = () => {
 }
 
 @media (prefers-color-scheme: dark) {
-  .thank-you-content {
-    background: var(--vf-color-bg-secondary, #1a1a1a);
-  }
-
-  .thank-you-title {
-    color: var(--vf-color-text, #ffffff);
-  }
-
-  .thank-you-message {
-    color: var(--vf-color-text-secondary, #adb5bd);
-  }
-
   .info-callout {
     background: var(--vf-color-bg-secondary, #111827);
     border-color: var(--vf-color-primary, #60a5fa);
