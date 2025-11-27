@@ -29,6 +29,13 @@ body.dark {
 }
 
 :root {
-  font-family: Source Sans Pro, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    Source Sans Pro,
+    Inter,
+    system-ui,
+    Avenir,
+    Helvetica,
+    Arial,
+    sans-serif;
   line-height: 1.5;
 }

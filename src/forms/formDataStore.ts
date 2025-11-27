@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useFormsStore = defineStore('forms', {
   state: () => {
     return {
-      form: {}
-    }
+      form: {},
+    };
   },
-})
+});

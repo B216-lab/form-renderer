@@ -3,11 +3,22 @@ This component allows users to dynamically choose where they'd like the center o
 VueForm Discord Server.
 -->
 <template>
-  <component :is="elementLayout" :multiple="true" ref="container">
+  <component
+    :is="elementLayout"
+    :multiple="true"
+    ref="container"
+  >
     <template #element>
-      <div :style="{ height: '300px', width: '100%' }" ref="mapElement" />
+      <div
+        :style="{ height: '300px', width: '100%' }"
+        ref="mapElement"
+      />
       <div class="mt-2">
-        <label for="coordinates" class="mr-2">Coordinates:</label>
+        <label
+          for="coordinates"
+          class="mr-2"
+          >Coordinates:</label
+        >
         <div :class="classes.inputWrapper">
           <input
             id="coordinates"
@@ -20,20 +31,29 @@ VueForm Discord Server.
         </div>
       </div>
     </template>
-    <template v-for="(component, slot) in elementSlots" #[slot]>
-      <slot :name="slot" :element="el$">
-        <component :is="component" :element="el$" />
+    <template
+      v-for="(component, slot) in elementSlots"
+      #[slot]
+    >
+      <slot
+        :name="slot"
+        :element="el$"
+      >
+        <component
+          :is="component"
+          :element="el$"
+        />
       </slot>
     </template>
   </component>
 </template>
 
 <script>
-import { computed, onMounted, ref } from "vue";
-import { defineElement } from "@vueform/vueform";
+import { computed, onMounted, ref } from 'vue';
+import { defineElement } from '@vueform/vueform';
 
 export default defineElement({
-  name: "MapcenterElement",
+  name: 'MapcenterElement',
   setup(_props, { element }) {
     const { value } = element;
     const mapElement = ref(null);
@@ -44,14 +64,14 @@ export default defineElement({
      * Default classes for the element
      */
     const defaultClasses = ref({
-      container: "",
+      container: '',
       inputWrapper:
-        "w-full flex flex-1 transition-input duration-200 border-solid form-border-width-input form-shadow-input form-input-group group form-radius-input form-h-input-height form-bg-input form-color-input form-border-color-input hover:form-bg-input-hover hover:form-color-input-hover hover:form-border-color-input-hover hover:form-shadow-input-hover focused:form-bg-input-focus focused:form-color-input-focus focused:form-border-color-input-focus focused:form-shadow-input-focus focused:form-ring focused-hover:form-shadow-input-hover",
+        'w-full flex flex-1 transition-input duration-200 border-solid form-border-width-input form-shadow-input form-input-group group form-radius-input form-h-input-height form-bg-input form-color-input form-border-color-input hover:form-bg-input-hover hover:form-color-input-hover hover:form-border-color-input-hover hover:form-shadow-input-hover focused:form-bg-input-focus focused:form-color-input-focus focused:form-border-color-input-focus focused:form-shadow-input-focus focused:form-ring focused-hover:form-shadow-input-hover',
       input:
-        "w-full bg-transparent h-full form-p-input form-radius-input form-text with-floating:form-p-input-floating border-0 form-color-input group-hover:form-color-input-hover form-autofill-default",
-      input_sm: "text-sm",
-      input_md: "text-base",
-      input_lg: "text-lg",
+        'w-full bg-transparent h-full form-p-input form-radius-input form-text with-floating:form-p-input-floating border-0 form-color-input group-hover:form-color-input-hover form-autofill-default',
+      input_sm: 'text-sm',
+      input_md: 'text-base',
+      input_lg: 'text-lg',
       $input: (classes, { Size }) => [classes.input, classes[`input_${Size}`]],
     });
 
@@ -65,7 +85,7 @@ export default defineElement({
           6
         )}, ${element.value.value.lng.toFixed(6)}`;
       }
-      return "0, 0";
+      return '0, 0';
     });
 
     /**
@@ -79,7 +99,7 @@ export default defineElement({
         zoom: 2,
       });
 
-      window.google.maps.event.addListener(map, "click", (event) => {
+      window.google.maps.event.addListener(map, 'click', (event) => {
         placeMarker(event.latLng);
       });
 
@@ -119,7 +139,7 @@ export default defineElement({
      * @param event {Event}
      */
     const updateCoordinates = (event) => {
-      const parts = event.target.value.split(",");
+      const parts = event.target.value.split(',');
       if (parts.length === 2) {
         const [latStr, lngStr] = parts;
         const lat = parseFloat(latStr.trim());
@@ -128,7 +148,7 @@ export default defineElement({
           const newLocation = new window.google.maps.LatLng(lat, lng);
           placeMarker(newLocation);
         } else {
-          console.warn("Invalid coordinates format");
+          console.warn('Invalid coordinates format');
         }
       } else {
         console.warn('Coordinates should be in the format "lat, lng"');
@@ -141,7 +161,7 @@ export default defineElement({
         loadMap();
       } else {
         // Here we could implement a retry mechanism or show an error message
-        console.error("Google Maps API not loaded");
+        console.error('Google Maps API not loaded');
       }
     });
 

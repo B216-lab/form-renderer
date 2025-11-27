@@ -411,7 +411,7 @@ import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
 import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
 import { Validator } from '@vueform/vueform';
-import type { DaDataAddress, DaDataAddressSuggestion } from 'react-dadata';
+import type { DaDataAddressSuggestion } from 'react-dadata';
 
 const precise = class extends Validator {
   check(suggestion: DaDataAddressSuggestion | null) {

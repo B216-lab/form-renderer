@@ -1,5 +1,4 @@
 import { ref } from 'vue';
-import type { DaDataAddress, DaDataSuggestion } from 'react-dadata';
 import { fetchDaDataSuggestionsAddress } from '@/daDataService/DadataApi';
 
 const DEFAULT_ADDRESS_DELAY = 1000;
