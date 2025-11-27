@@ -9,5 +9,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - run: |
-          pnpm
+          pnpm add -w prettier@3.7.1
           pnpm prettier . --check
