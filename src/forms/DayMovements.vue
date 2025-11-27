@@ -445,7 +445,7 @@ const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
 
 const isSubmitted = ref(false);
 const ADDRESS_SUGGESTION_HINT =
-  'Начните вводить адрес, чтобы увидеть подсказки и выбрать нужный вариант. Необходимо выбрать из списка';
+  'Начните вводить адрес, чтобы увидеть подсказки и выбрать нужный вариант. Необходимо выбрать из списка с точностью до дома';
 
 const handleSuccess = () => {
   isSubmitted.value = true;
