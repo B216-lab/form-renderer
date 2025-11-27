@@ -164,23 +164,10 @@
           description="Код предприятия"
         />
         <StaticElement
-          name="h1"
-          tag="h1"
-          content="Важно"
-        />
-        <StaticElement
           name="html"
-          content="<ol>
-<li>Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности (например: 1 - из дома на работу, 2 - с работы в магазин, 3 - из магазина домой, 4 - снова из дома в детский сад и т.д.)
-</li>
-<li>В каждом передвижении важно выбирать адрес отправления и прибытия из списка, который выпадает в качестве подсказки при вводе адреса (для корректного определения координат местоположения)
-</li>
-</ol>"
+          content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
           :expressions="true"
-        />
-        <StaticElement
-          name="divider"
-          tag="hr"
+          add-class="info-callout"
         />
         <ListElement
           name="movements"
@@ -494,6 +481,39 @@ const handleSuccess = () => {
   color: var(--vf-color-text-secondary, #6c757d);
 }
 
+.info-callout {
+  background: var(--vf-color-bg-secondary, #f1f5f9);
+  border-left: 4px solid var(--vf-color-primary, #3b82f6);
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  color: var(--vf-color-text, #0f172a);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.info-callout__title {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--vf-color-primary, #3b82f6);
+}
+
+.info-callout p {
+  margin: 0;
+  color: var(--vf-color-text, #0f172a);
+}
+
+.info-callout a {
+  color: var(--vf-color-primary, #3b82f6);
+  text-decoration: underline;
+}
+
+.info-callout a:hover {
+  text-decoration: none;
+}
+
 @media (prefers-color-scheme: dark) {
   .thank-you-content {
     background: var(--vf-color-bg-secondary, #1a1a1a);
@@ -505,6 +525,20 @@ const handleSuccess = () => {
 
   .thank-you-message {
     color: var(--vf-color-text-secondary, #adb5bd);
+  }
+
+  .info-callout {
+    background: var(--vf-color-bg-secondary, #111827);
+    border-color: var(--vf-color-primary, #60a5fa);
+    color: var(--vf-color-text, #f8fafc);
+  }
+
+  .info-callout__title {
+    color: var(--vf-color-primary, #60a5fa);
+  }
+
+  .info-callout p {
+    color: var(--vf-color-text, #f8fafc);
   }
 }
 </style>
