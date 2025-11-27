@@ -285,7 +285,11 @@
                   input-type="search"
                   autocomplete="off"
                   :description="ADDRESS_SUGGESTION_HINT"
-                  :rules="['required', precise]"
+                  :rules="[
+                    'required',
+                    precise,
+                    'different:movements.*.container.coordinatesArrivalAddress',
+                  ]"
                   :conditions="[
                     [
                       'movements.*.container.departurePlace',
@@ -352,7 +356,11 @@
                   autocomplete="off"
                   label="Адрес прибытия"
                   :description="ADDRESS_SUGGESTION_HINT"
-                  :rules="['required', precise]"
+                  :rules="[
+                    'required',
+                    precise,
+                    'different:movements.*.container.coordinatesDepartureAddress',
+                  ]"
                   :conditions="[
                     [
                       'movements.*.container.departurePlace',
