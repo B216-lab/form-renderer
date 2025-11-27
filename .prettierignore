@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+*.md
+.*
+node_modules
+.pnpm-store
+apache-superset-project
+src/forms/day_movements_builder.json
+LICENSE
