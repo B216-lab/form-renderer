@@ -297,7 +297,7 @@
                   :rules="[
                     'required',
                     precise,
-                    'different:movements.*.container.coordinatesArrivalAddress',
+                    'different:movements.*.container.departurePlace',
                   ]"
                   :conditions="[
                     [
@@ -377,7 +377,7 @@
                   ]"
                   :conditions="[
                     [
-                      'movements.*.container.departurePlace',
+                      'movements.*.container.arrivalPlace',
                       'not_in',
                       ['HOME_RESIDENCE'],
                     ],
