@@ -1,10 +1,9 @@
-import { ref } from 'vue'
-import type { DaDataAddress, DaDataSuggestion } from 'react-dadata'
-import { fetchDaDataSuggestionsAddress } from '@/daDataService/DadataApi'
-import { logger } from '@/logger'
+import { ref } from 'vue';
+import type { DaDataAddress, DaDataSuggestion } from 'react-dadata';
+import { fetchDaDataSuggestionsAddress } from '@/daDataService/DadataApi';
 
-const DEFAULT_ADDRESS_DELAY = 1000
-const DEFAULT_MIN_CHARS = 3
+const DEFAULT_ADDRESS_DELAY = 1000;
+const DEFAULT_MIN_CHARS = 3;
 
 /**
  * Возвращает логику получения подсказок адреса DaData
@@ -14,9 +13,9 @@ const DEFAULT_MIN_CHARS = 3
  */
 export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
   // Использует AbortController для отмены предыдущих запросов при новом вводе
-  const abortControllerRef = ref<AbortController | null>(null)
+  const abortControllerRef = ref<AbortController | null>(null);
   // Отслеживает текущий запрос для предотвращения race condition
-  const currentQueryRef = ref<string | null>(null)
+  const currentQueryRef = ref<string | null>(null);
 
   /**
    * Получает элементы подсказок адреса для SelectElement
@@ -25,54 +24,44 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
    * @returns Массив элементов с полями value/label
    */
   async function getAddressItems(searchQuery: string) {
-    logger.debug('[DaData] getAddressItems called', { searchQuery })
-
     if (abortControllerRef.value) {
-      logger.debug('[DaData] Aborting previous request')
-      abortControllerRef.value.abort()
+      abortControllerRef.value.abort();
     }
 
-    const controller = new AbortController()
-    abortControllerRef.value = controller
-    currentQueryRef.value = searchQuery
-    logger.verbose('[DaData] New AbortController created')
+    const controller = new AbortController();
+    abortControllerRef.value = controller;
+    currentQueryRef.value = searchQuery;
 
     if (!searchQuery || searchQuery.trim().length < minChars) {
-      logger.info('[DaData] Query too short, skip fetch', { length: searchQuery?.trim().length || 0 })
-      return []
+      return [];
     }
 
     try {
-      logger.debug('[DaData] Fetching suggestions...', { query: searchQuery })
-      const { suggestions } = await fetchDaDataSuggestionsAddress(controller.signal, { query: searchQuery })
-      
+      const { suggestions } = await fetchDaDataSuggestionsAddress(
+        controller.signal,
+        { query: searchQuery }
+      );
+
       // Проверяет, что запрос не был отменен и это все еще актуальный запрос
       if (controller.signal.aborted || currentQueryRef.value !== searchQuery) {
-        logger.debug('[DaData] Request outdated, ignoring results')
-        return []
+        return [];
       }
-      
-      const count = suggestions?.length ?? 0
-      logger.info('[DaData] Suggestions received', { count })
-      console.log('[DaData] Suggestions payload', suggestions)
+
       return (suggestions ?? []).map((s: DaDataSuggestion<DaDataAddress>) => ({
         value: s.data,
         label: s.value,
-      }))
+      }));
     } catch (err) {
       if (controller.signal.aborted || currentQueryRef.value !== searchQuery) {
-        logger.warn('[DaData] Request aborted or outdated')
-        return []
+        return [];
       }
-      logger.error('[DaData] Error while fetching suggestions', err)
-      return []
+      console.error('[DaData] Error while fetching suggestions', err);
+      return [];
     }
   }
 
   return {
     getAddressItems,
     ADDRESS_DELAY: DEFAULT_ADDRESS_DELAY,
-  }
+  };
 }
-
-
