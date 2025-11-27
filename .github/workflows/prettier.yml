@@ -1,0 +1,13 @@
+name: Style with prettier
+on:
+  pull_request:
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: |
+          pnpm
+          pnpm prettier . --check
