@@ -286,6 +286,13 @@
                   autocomplete="off"
                   :description="ADDRESS_SUGGESTION_HINT"
                   :rules="['required', precise]"
+                  :conditions="[
+                    [
+                      'movements.*.container.departurePlace',
+                      'not_in',
+                      ['HOME_RESIDENCE'],
+                    ],
+                  ]"
                 />
                 <StaticElement
                   name="divider_1"
@@ -346,6 +353,13 @@
                   label="Адрес прибытия"
                   :description="ADDRESS_SUGGESTION_HINT"
                   :rules="['required', precise]"
+                  :conditions="[
+                    [
+                      'movements.*.container.departurePlace',
+                      'not_in',
+                      ['HOME_RESIDENCE'],
+                    ],
+                  ]"
                 />
                 <StaticElement
                   name="divider_2"
