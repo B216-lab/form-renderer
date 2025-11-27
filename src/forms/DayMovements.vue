@@ -79,7 +79,6 @@
           }"
           label="Пол"
           :rules="['required']"
-          floating="Пол"
         />
         <SelectElement
           name="socialStatus"
@@ -106,7 +105,12 @@
         <SelectElement
           name="coordinatesAddress"
           :items="getAddressItems"
+          :resolve-on-load="false"
           :delay="ADDRESS_DELAY"
+          label-prop="value"
+          :object="true"
+          allow-absent
+          :min-chars="DEFAULT_MIN_CHARS"
           :search="true"
           :native="false"
           label="Адрес проживания"
@@ -279,7 +283,12 @@
                   :items="getAddressItems"
                   :delay="ADDRESS_DELAY"
                   :search="true"
+                  label-prop="value"
+                  :object="true"
+                  allow-absent
+                  :resolve-on-load="false"
                   :native="false"
+                  :min-chars="DEFAULT_MIN_CHARS"
                   :filter-results="false"
                   label="Адрес отправления"
                   input-type="search"
@@ -350,6 +359,11 @@
                   :items="getAddressItems"
                   :delay="ADDRESS_DELAY"
                   :search="true"
+                  label-prop="value"
+                  :object="true"
+                  allow-absent
+                  :min-chars="DEFAULT_MIN_CHARS"
+                  :resolve-on-load="false"
                   :native="false"
                   :filter-results="false"
                   input-type="search"
@@ -397,16 +411,16 @@ import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
 import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
 import { Validator } from '@vueform/vueform';
-import type { DaDataAddress } from 'react-dadata';
+import type { DaDataAddress, DaDataAddressSuggestion } from 'react-dadata';
 
 const precise = class extends Validator {
-  check(value: DaDataAddress | null) {
-    console.log(value);
+  check(suggestion: DaDataAddressSuggestion | null) {
+    const address = suggestion?.data;
     if (
-      !value ||
-      typeof value !== 'object' ||
-      !('house' in value) ||
-      !value.house
+      !address ||
+      typeof address !== 'object' ||
+      !('house' in address) ||
+      !address.house
     ) {
       return false;
     }
@@ -418,7 +432,6 @@ const precise = class extends Validator {
 };
 
 const prepare = (form$: Vueform) => {
-  // TODO add enhanced home address validation: it has to be house or apartment address
   console.log(form$.data);
 };
 
@@ -449,7 +462,8 @@ onMounted(async () => {
   }
 });
 
-const { getAddressItems, ADDRESS_DELAY } = useDaDataAddress(3);
+const { getAddressItems, ADDRESS_DELAY, DEFAULT_MIN_CHARS } =
+  useDaDataAddress(3);
 
 const isSubmitted = ref(false);
 const ADDRESS_SUGGESTION_HINT =

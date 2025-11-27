@@ -47,10 +47,7 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
         return [];
       }
 
-      return (suggestions ?? []).map((s: DaDataSuggestion<DaDataAddress>) => ({
-        value: s.data,
-        label: s.value,
-      }));
+      return suggestions ?? [];
     } catch (err) {
       if (controller.signal.aborted || currentQueryRef.value !== searchQuery) {
         return [];
@@ -63,5 +60,6 @@ export function useDaDataAddress(minChars: number = DEFAULT_MIN_CHARS) {
   return {
     getAddressItems,
     ADDRESS_DELAY: DEFAULT_ADDRESS_DELAY,
+    DEFAULT_MIN_CHARS,
   };
 }
