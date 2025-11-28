@@ -509,15 +509,7 @@ const handleSuccess = () => {
 @import '@vueform/vueform/themes/vueform/scss/index.scss';
 
 .day-movements {
-  padding: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-  min-height: 100vh;
-  width: 100vw;
-  max-width: 100%;
-  position: relative;
+  padding: 15px;
 }
 
 .day-movements__card {
@@ -527,11 +519,6 @@ const handleSuccess = () => {
   border-radius: 10px;
   position: relative;
   width: 100%;
-}
-
-body.dark .day-movements {
-  background-color: #080808;
-  color: #fff;
 }
 
 #app.dark .day-movements__card {

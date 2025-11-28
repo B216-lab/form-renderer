@@ -1,129 +1,140 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h1 class="login-title">
-        {{ isRegisterMode ? 'Создание аккаунта' : 'Вход в систему' }}
-      </h1>
-
-      <div
-        class="auth-toggle"
-        role="tablist"
+  <n-layout
+    :style="layoutStyle"
+    :content-style="layoutContentStyle"
+  >
+    <n-layout-content>
+      <n-card
+        size="large"
+        :style="cardStyle"
       >
-        <button
-          type="button"
-          class="auth-toggle__btn"
-          :class="{ 'auth-toggle__btn--active': !isRegisterMode }"
-          @click="setMode('login')"
-          :disabled="authStore.isLoading"
-        >
-          Вход
-        </button>
-        <button
-          type="button"
-          class="auth-toggle__btn"
-          :class="{ 'auth-toggle__btn--active': isRegisterMode }"
-          @click="setMode('register')"
-          :disabled="authStore.isLoading"
-        >
-          Регистрация
-        </button>
-      </div>
-
-      <form
-        @submit.prevent="handleSubmit"
-        class="login-form"
-      >
-        <div class="form-group">
-          <label
-            for="email"
-            class="form-label"
-            >Email</label
+        <template #header>
+          <n-space
+            vertical
+            :size="4"
+            align="center"
           >
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            autocomplete="email"
-            class="form-input"
-            placeholder="user@example.com"
-            :disabled="authStore.isLoading"
-          />
-        </div>
+            <span :style="titleStyle">
+              {{ isRegisterMode ? 'Создание аккаунта' : 'Вход в систему' }}
+            </span>
+          </n-space>
+        </template>
 
-        <div class="form-group">
-          <label
-            for="password"
-            class="form-label"
-            >Пароль</label
+        <n-tabs
+          v-model:value="authMode"
+          type="segment"
+          size="large"
+        >
+          <n-tab-pane
+            name="login"
+            tab="Вход"
+          />
+          <n-tab-pane
+            name="register"
+            tab="Регистрация"
+          />
+        </n-tabs>
+
+        <n-form
+          layout="vertical"
+          :show-feedback="false"
+          @submit.prevent="handleSubmit"
+        >
+          <n-form-item label="Email">
+            <n-input
+              v-model:value="email"
+              type="text"
+              inputmode="email"
+              placeholder="user@example.com"
+              autocomplete="email"
+              :disabled="authStore.isLoading"
+            />
+          </n-form-item>
+
+          <n-form-item label="Пароль">
+            <n-input
+              v-model:value="password"
+              type="password"
+              placeholder="Введите пароль"
+              autocomplete="current-password"
+              :disabled="authStore.isLoading"
+            />
+          </n-form-item>
+
+          <n-form-item
+            v-if="isRegisterMode"
+            label="Повторите пароль"
           >
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            autocomplete="current-password"
-            class="form-input"
-            placeholder="Введите пароль"
-            :disabled="authStore.isLoading"
-          />
-        </div>
+            <n-input
+              v-model:value="confirmPassword"
+              type="password"
+              placeholder="Повторите пароль"
+              autocomplete="new-password"
+              :disabled="authStore.isLoading"
+            />
+          </n-form-item>
 
-        <div
-          v-if="isRegisterMode"
-          class="form-group"
-        >
-          <label
-            for="confirm"
-            class="form-label"
-            >Повторите пароль</label
+          <n-form-item
+            v-if="passwordsMismatch"
+            :show-label="false"
           >
-          <input
-            id="confirm"
-            v-model="confirmPassword"
-            type="password"
-            required
-            autocomplete="new-password"
-            class="form-input"
-            placeholder="Повторите пароль"
-            :disabled="authStore.isLoading"
-          />
-        </div>
+            <n-alert
+              type="warning"
+              title="Проверить пароль"
+              closable
+            >
+              Пароли не совпадают
+            </n-alert>
+          </n-form-item>
 
-        <div
-          v-if="passwordsMismatch"
-          class="helper-message helper-message--error"
-        >
-          Пароли не совпадают
-        </div>
+          <n-form-item
+            v-if="errorMessage"
+            :show-label="false"
+          >
+            <n-alert
+              type="error"
+              closable
+              @close="errorMessage = ''"
+            >
+              {{ errorMessage }}
+            </n-alert>
+          </n-form-item>
 
-        <div
-          v-if="errorMessage"
-          class="error-message"
-        >
-          {{ errorMessage }}
-        </div>
-
-        <button
-          type="submit"
-          class="login-button"
-          :disabled="isSubmitDisabled"
-        >
-          <span v-if="authStore.isLoading">
-            {{ isRegisterMode ? 'Регистрация...' : 'Вход...' }}
-          </span>
-          <span v-else>
-            {{ isRegisterMode ? 'Зарегистрироваться' : 'Войти' }}
-          </span>
-        </button>
-      </form>
-    </div>
-  </div>
+          <n-form-item :show-label="false">
+            <n-button
+              type="primary"
+              size="large"
+              :block="true"
+              attr-type="submit"
+              :loading="authStore.isLoading"
+              :disabled="isSubmitDisabled"
+            >
+              {{ isRegisterMode ? 'Зарегистрироваться' : 'Войти' }}
+            </n-button>
+          </n-form-item>
+        </n-form>
+      </n-card>
+    </n-layout-content>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: 'LoginScreen' });
-import { ref, onMounted, computed } from 'vue';
+import {
+  NAlert,
+  NButton,
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NLayout,
+  NLayoutContent,
+  NSpace,
+  NTabPane,
+  NTabs,
+} from 'naive-ui';
+import { ref, onMounted, computed, watch } from 'vue';
+import type { CSSProperties } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -132,7 +143,10 @@ const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
 const confirmPassword = ref('');
-const isRegisterMode = ref(false);
+type AuthMode = 'login' | 'register';
+const authMode = ref<AuthMode>('login');
+
+const isRegisterMode = computed(() => authMode.value === 'register');
 
 const passwordsMismatch = computed(
   () =>
@@ -151,15 +165,12 @@ const isSubmitDisabled = computed(() => {
   return false;
 });
 
-type AuthMode = 'login' | 'register';
-
-const setMode = (mode: AuthMode) => {
-  isRegisterMode.value = mode === 'register';
+watch(authMode, (mode) => {
   errorMessage.value = '';
-  if (!isRegisterMode.value) {
+  if (mode === 'login') {
     confirmPassword.value = '';
   }
-};
+});
 
 const handleSubmit = async () => {
   if (isSubmitDisabled.value) {
@@ -191,184 +202,34 @@ onMounted(() => {
   password.value = '';
   errorMessage.value = '';
   confirmPassword.value = '';
-  isRegisterMode.value = false;
+  authMode.value = 'login';
 });
+
+const layoutStyle: CSSProperties = {
+  minHeight: '100vh',
+};
+
+const layoutContentStyle: CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: '24px',
+  background: 'var(--n-body-color)',
+};
+
+const cardStyle: CSSProperties = {
+  maxWidth: '420px',
+  width: '100%',
+  margin: '0 auto',
+};
+
+const titleStyle: CSSProperties = {
+  fontSize: '1.5rem',
+  fontWeight: 600,
+  textAlign: 'center',
+  display: 'inline-block',
+};
 </script>
 
-<style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f5f6fb;
-  padding: 1.5rem;
-}
-
-.login-card {
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  padding: 2rem;
-  width: 100%;
-  max-width: 420px;
-}
-
-.login-title {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
-  text-align: center;
-}
-
-.auth-toggle {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.auth-toggle__btn {
-  flex: 1;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 6px;
-  background: #f8fafc;
-  color: #1f2933;
-  cursor: pointer;
-  font-weight: 600;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-}
-
-.auth-toggle__btn--active {
-  background: #e2e8f0;
-  border-color: rgba(15, 23, 42, 0.2);
-}
-
-.auth-toggle__btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.form-input {
-  padding: 0.7rem 0.9rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 6px;
-  font-size: 1rem;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-  background: #fff;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-
-.form-input:disabled {
-  background-color: #f7fafc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  padding: 0.6rem;
-  background-color: rgba(226, 29, 72, 0.08);
-  color: #b91c1c;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  text-align: center;
-}
-
-.helper-message {
-  font-size: 0.85rem;
-  color: #475569;
-  text-align: center;
-}
-
-.helper-message--error {
-  color: #b91c1c;
-}
-
-.login-button {
-  padding: 0.8rem 1.25rem;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.login-button:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-.login-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@media (prefers-color-scheme: dark) {
-  .login-card {
-    background: #1a202c;
-    color: #f7fafc;
-  }
-
-  .login-title {
-    color: #f7fafc;
-  }
-
-  .form-label {
-    color: #cbd5e0;
-  }
-
-  .form-input {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #f7fafc;
-  }
-
-  .form-input:focus {
-    border-color: #667eea;
-  }
-
-  .form-input:disabled {
-    background-color: #2d3748;
-  }
-
-  .auth-toggle__btn {
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #cbd5e0;
-    background: rgba(15, 23, 42, 0.2);
-  }
-
-  .auth-toggle__btn--active {
-    color: #fff;
-    background: rgba(37, 99, 235, 0.35);
-  }
-}
-</style>
+<style scoped></style>
