@@ -134,10 +134,13 @@ import {
   NTabs,
 } from 'naive-ui';
 import { ref, onMounted, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import type { CSSProperties } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 
 const email = ref('');
 const password = ref('');
@@ -157,6 +160,10 @@ const passwordsMismatch = computed(
 );
 
 const isSubmitDisabled = computed(() => {
+  // В dev-режиме кнопка всегда разблокирована
+  if (import.meta.env.DEV) {
+    return false;
+  }
   if (authStore.isLoading) return true;
   if (!email.value || !password.value) return true;
   if (isRegisterMode.value) {
@@ -188,6 +195,10 @@ const handleSubmit = async () => {
       await authStore.register(email.value, password.value);
     }
     await authStore.login(email.value, password.value);
+
+    const redirectPath =
+      typeof route.query.redirect === 'string' ? route.query.redirect : '/';
+    await router.push(redirectPath);
   } catch (error) {
     const fallback = isRegisterMode.value
       ? 'Ошибка регистрации'

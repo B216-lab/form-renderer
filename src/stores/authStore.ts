@@ -52,7 +52,9 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({ error: 'Login failed' }));
+          const error = await response
+            .json()
+            .catch(() => ({ error: 'Login failed' }));
           throw new Error(error.error || 'Неверные логин или пароль');
         }
 
@@ -129,6 +131,7 @@ export const useAuthStore = defineStore('auth', {
      * Выполняет выход пользователя и инвалидирует сессию.
      */
     async logout(): Promise<void> {
+      this.isLoading = true;
       try {
         await apiFetch('/api/v1/auth/logout', {
           method: 'POST',
@@ -138,8 +141,8 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isAuthenticated = false;
         this.user = null;
+        this.isLoading = false;
       }
     },
   },
 });
-
