@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { apiFetch } from '../api';
+import { apiFetch, ApiNetworkError, ApiHttpError } from '../api';
+import { handleApiError } from '../utils/errorHandler';
 
 interface UserInfo {
   username: string;
@@ -10,6 +11,7 @@ interface AuthState {
   isAuthenticated: boolean;
   user: UserInfo | null;
   isLoading: boolean;
+  lastNetworkError: Error | null;
 }
 
 /**
@@ -21,6 +23,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: false,
     user: null,
     isLoading: false,
+    lastNetworkError: null,
   }),
 
   getters: {
@@ -51,19 +54,27 @@ export const useAuthStore = defineStore('auth', {
           body: JSON.stringify({ email, password }),
         });
 
-        if (!response.ok) {
-          const error = await response
-            .json()
-            .catch(() => ({ error: 'Login failed' }));
-          throw new Error(error.error || 'Неверные логин или пароль');
-        }
-
         const data = await response.json();
         this.isAuthenticated = true;
         this.user = {
           username: data.username,
           authorities: data.authorities || [],
         };
+      } catch (error) {
+        // Если это ошибка сети или HTTP, показываем уведомление
+        if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          handleApiError(error);
+          // Для ошибок сети/HTTP пробрасываем дальше с понятным сообщением
+          throw error;
+        }
+        // Для других ошибок (например, неверные учетные данные) пробрасываем как есть
+        const errorData =
+          error instanceof Error ? error : { error: 'Login failed' };
+        throw new Error(
+          errorData instanceof Error && errorData.message
+            ? errorData.message
+            : 'Неверные логин или пароль'
+        );
       } finally {
         this.isLoading = false;
       }
@@ -79,20 +90,23 @@ export const useAuthStore = defineStore('auth', {
     async register(email: string, password: string): Promise<void> {
       this.isLoading = true;
       try {
-        const response = await apiFetch('/api/v1/signup', {
+        await apiFetch('/api/v1/signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
         });
-
-        if (!response.ok) {
-          const message =
-            (await response.text().catch(() => '')) ||
-            'Не удалось создать аккаунт';
-          throw new Error(message);
+      } catch (error) {
+        // Если это ошибка сети или HTTP, показываем уведомление
+        if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          handleApiError(error);
+          throw error;
         }
+        // Для других ошибок пробрасываем как есть
+        const message =
+          error instanceof Error ? error.message : 'Не удалось создать аккаунт';
+        throw new Error(message);
       } finally {
         this.isLoading = false;
       }
@@ -103,25 +117,26 @@ export const useAuthStore = defineStore('auth', {
      */
     async checkAuth(): Promise<void> {
       this.isLoading = true;
+      this.lastNetworkError = null;
       try {
         const response = await apiFetch('/api/v1/auth/me', {
           method: 'GET',
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          this.isAuthenticated = true;
-          this.user = {
-            username: data.username,
-            authorities: data.authorities || [],
-          };
-        } else {
-          this.isAuthenticated = false;
-          this.user = null;
-        }
-      } catch {
+        const data = await response.json();
+        this.isAuthenticated = true;
+        this.user = {
+          username: data.username,
+          authorities: data.authorities || [],
+        };
+      } catch (error) {
         this.isAuthenticated = false;
         this.user = null;
+
+        // Сохраняем сетевые ошибки для показа после инициализации приложения
+        if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          this.lastNetworkError = error;
+        }
       } finally {
         this.isLoading = false;
       }
@@ -137,7 +152,8 @@ export const useAuthStore = defineStore('auth', {
           method: 'POST',
         });
       } catch {
-        // Игнорируем ошибки при выходе
+        // При выходе не показываем ошибки, даже если сервер недоступен
+        // Пользователь все равно должен иметь возможность выйти локально
       } finally {
         this.isAuthenticated = false;
         this.user = null;

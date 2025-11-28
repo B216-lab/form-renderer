@@ -34,13 +34,6 @@ const router = createRouter({
 router.beforeEach(async (to: RouteLocationNormalized, _from, next) => {
   const authStore = useAuthStore();
 
-  if (import.meta.env.DEV) {
-    if (to.meta.guestOnly) {
-      return next();
-    }
-    return next();
-  }
-
   if (!authStore.isAuthenticated) {
     // Попытка восстановления сессии при прямом переходе
     await authStore.checkAuth().catch(() => undefined);
