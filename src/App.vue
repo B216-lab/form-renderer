@@ -1,22 +1,33 @@
 <template>
-  <div v-if="authStore.isLoading" class="loading-container">
+  <div
+    v-if="authStore.isLoading"
+    class="loading-container"
+  >
     <div class="loading-spinner"></div>
     <p>Загрузка...</p>
   </div>
   <Login v-else-if="!authStore.isAuthenticated" />
-  <div v-else class="app-container">
+  <div
+    v-else
+    class="app-container"
+  >
     <header class="app-header">
       <div class="header-content">
         <h1 class="app-title">Форма передвижений</h1>
         <div class="user-info">
           <span class="username">{{ authStore.user?.username }}</span>
-          <button @click="handleLogout" class="logout-button">Выйти</button>
+          <button
+            @click="handleLogout"
+            class="logout-button"
+          >
+            Выйти
+          </button>
         </div>
       </div>
     </header>
-    <main class="app-main">
-      <DayMovements />
-    </main>
+    <!-- <main class="app-main"> -->
+    <DayMovements />
+    <!-- </main> -->
   </div>
 </template>
 
@@ -64,10 +75,10 @@ const handleLogout = async () => {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  color: #1f2933;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .header-content {
@@ -80,34 +91,37 @@ const handleLogout = async () => {
 
 .app-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .username {
   font-size: 0.875rem;
-  opacity: 0.9;
+  color: #475569;
 }
 
 .logout-button {
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  background: transparent;
+  color: #1f2933;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: background 0.2s;
+  font-size: 0.85rem;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .logout-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #1f2933;
+  color: #fff;
 }
 
 .app-main {
@@ -120,7 +134,7 @@ const handleLogout = async () => {
 
 @media (max-width: 768px) {
   .app-header {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .header-content {

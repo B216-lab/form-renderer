@@ -1,10 +1,44 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1 class="login-title">Вход в систему</h1>
-      <form @submit.prevent="handleLogin" class="login-form">
+      <h1 class="login-title">
+        {{ isRegisterMode ? 'Создание аккаунта' : 'Вход в систему' }}
+      </h1>
+
+      <div
+        class="auth-toggle"
+        role="tablist"
+      >
+        <button
+          type="button"
+          class="auth-toggle__btn"
+          :class="{ 'auth-toggle__btn--active': !isRegisterMode }"
+          @click="setMode('login')"
+          :disabled="authStore.isLoading"
+        >
+          Вход
+        </button>
+        <button
+          type="button"
+          class="auth-toggle__btn"
+          :class="{ 'auth-toggle__btn--active': isRegisterMode }"
+          @click="setMode('register')"
+          :disabled="authStore.isLoading"
+        >
+          Регистрация
+        </button>
+      </div>
+
+      <form
+        @submit.prevent="handleSubmit"
+        class="login-form"
+      >
         <div class="form-group">
-          <label for="email" class="form-label">Email</label>
+          <label
+            for="email"
+            class="form-label"
+            >Email</label
+          >
           <input
             id="email"
             v-model="email"
@@ -18,7 +52,11 @@
         </div>
 
         <div class="form-group">
-          <label for="password" class="form-label">Пароль</label>
+          <label
+            for="password"
+            class="form-label"
+            >Пароль</label
+          >
           <input
             id="password"
             v-model="password"
@@ -31,17 +69,52 @@
           />
         </div>
 
-        <div v-if="errorMessage" class="error-message">
+        <div
+          v-if="isRegisterMode"
+          class="form-group"
+        >
+          <label
+            for="confirm"
+            class="form-label"
+            >Повторите пароль</label
+          >
+          <input
+            id="confirm"
+            v-model="confirmPassword"
+            type="password"
+            required
+            autocomplete="new-password"
+            class="form-input"
+            placeholder="Повторите пароль"
+            :disabled="authStore.isLoading"
+          />
+        </div>
+
+        <div
+          v-if="passwordsMismatch"
+          class="helper-message helper-message--error"
+        >
+          Пароли не совпадают
+        </div>
+
+        <div
+          v-if="errorMessage"
+          class="error-message"
+        >
           {{ errorMessage }}
         </div>
 
         <button
           type="submit"
           class="login-button"
-          :disabled="authStore.isLoading || !email || !password"
+          :disabled="isSubmitDisabled"
         >
-          <span v-if="authStore.isLoading">Вход...</span>
-          <span v-else>Войти</span>
+          <span v-if="authStore.isLoading">
+            {{ isRegisterMode ? 'Регистрация...' : 'Вход...' }}
+          </span>
+          <span v-else>
+            {{ isRegisterMode ? 'Зарегистрироваться' : 'Войти' }}
+          </span>
         </button>
       </form>
     </div>
@@ -49,7 +122,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+defineOptions({ name: 'LoginScreen' });
+import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -57,14 +131,57 @@ const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const confirmPassword = ref('');
+const isRegisterMode = ref(false);
 
-const handleLogin = async () => {
+const passwordsMismatch = computed(
+  () =>
+    isRegisterMode.value &&
+    password.value.length > 0 &&
+    confirmPassword.value.length > 0 &&
+    password.value !== confirmPassword.value
+);
+
+const isSubmitDisabled = computed(() => {
+  if (authStore.isLoading) return true;
+  if (!email.value || !password.value) return true;
+  if (isRegisterMode.value) {
+    return !confirmPassword.value || passwordsMismatch.value;
+  }
+  return false;
+});
+
+type AuthMode = 'login' | 'register';
+
+const setMode = (mode: AuthMode) => {
+  isRegisterMode.value = mode === 'register';
+  errorMessage.value = '';
+  if (!isRegisterMode.value) {
+    confirmPassword.value = '';
+  }
+};
+
+const handleSubmit = async () => {
+  if (isSubmitDisabled.value) {
+    return;
+  }
+
+  if (passwordsMismatch.value) {
+    errorMessage.value = 'Пароли не совпадают';
+    return;
+  }
+
   errorMessage.value = '';
   try {
+    if (isRegisterMode.value) {
+      await authStore.register(email.value, password.value);
+    }
     await authStore.login(email.value, password.value);
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : 'Ошибка входа';
+    const fallback = isRegisterMode.value
+      ? 'Ошибка регистрации'
+      : 'Ошибка входа';
+    errorMessage.value = error instanceof Error ? error.message : fallback;
   }
 };
 
@@ -73,6 +190,8 @@ onMounted(() => {
   email.value = '';
   password.value = '';
   errorMessage.value = '';
+  confirmPassword.value = '';
+  isRegisterMode.value = false;
 });
 </script>
 
@@ -82,25 +201,55 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
+  background: #f5f6fb;
+  padding: 1.5rem;
 }
 
 .login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  padding: 2.5rem;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
 .login-title {
-  margin: 0 0 2rem 0;
-  font-size: 1.75rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: #1a202c;
+  color: #111827;
   text-align: center;
+}
+
+.auth-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.auth-toggle__btn {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #1f2933;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.auth-toggle__btn--active {
+  background: #e2e8f0;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.auth-toggle__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .login-form {
@@ -122,17 +271,20 @@ onMounted(() => {
 }
 
 .form-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  background: #fff;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .form-input:disabled {
@@ -141,33 +293,38 @@ onMounted(() => {
 }
 
 .error-message {
-  padding: 0.75rem;
-  background-color: #fed7d7;
-  color: #c53030;
+  padding: 0.6rem;
+  background-color: rgba(226, 29, 72, 0.08);
+  color: #b91c1c;
   border-radius: 6px;
   font-size: 0.875rem;
   text-align: center;
 }
 
+.helper-message {
+  font-size: 0.85rem;
+  color: #475569;
+  text-align: center;
+}
+
+.helper-message--error {
+  color: #b91c1c;
+}
+
 .login-button {
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.8rem 1.25rem;
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: background 0.2s;
 }
 
 .login-button:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
+  background: #1d4ed8;
 }
 
 .login-button:disabled {
@@ -202,6 +359,16 @@ onMounted(() => {
   .form-input:disabled {
     background-color: #2d3748;
   }
+
+  .auth-toggle__btn {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #cbd5e0;
+    background: rgba(15, 23, 42, 0.2);
+  }
+
+  .auth-toggle__btn--active {
+    color: #fff;
+    background: rgba(37, 99, 235, 0.35);
+  }
 }
 </style>
-

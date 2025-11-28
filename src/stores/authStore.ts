@@ -68,6 +68,35 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
+     * Создаёт нового пользователя на сервере.
+     *
+     * @param email email пользователя
+     * @param password пароль пользователя
+     * @throws Error если регистрация не удалась
+     */
+    async register(email: string, password: string): Promise<void> {
+      this.isLoading = true;
+      try {
+        const response = await apiFetch('/api/v1/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+          const message =
+            (await response.text().catch(() => '')) ||
+            'Не удалось создать аккаунт';
+          throw new Error(message);
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    /**
      * Проверяет текущую сессию и загружает информацию о пользователе.
      */
     async checkAuth(): Promise<void> {
