@@ -2,14 +2,73 @@
  * Базовый URL API бэкенда.
  * Может быть переопределён через переменную окружения.
  */
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+
+/**
+ * Имя заголовка, через который CSRF-токен передаётся обратно на сервер.
+ * Совпадает с CookieCsrfTokenRepository.DEFAULT_CSRF_HEADER_NAME.
+ */
+const CSRF_HEADER_NAME = 'X-XSRF-TOKEN';
+
+/**
+ * Кешированное значение CSRF-токена и имени заголовка.
+ */
+let cachedCsrfToken: string | null = null;
+let cachedCsrfHeaderName: string = CSRF_HEADER_NAME;
+
+/**
+ * Загружает CSRF-токен с бэкенда и кеширует его в памяти.
+ * Эндпоинт `/api/v1/auth/csrf` возвращает имя заголовка и значение токена.
+ */
+async function ensureCsrfTokenLoaded(): Promise<void> {
+  if (cachedCsrfToken) {
+    return;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/api/v1/auth/csrf`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof TypeError
+        ? 'Не удалось получить CSRF токен. Проверьте, что сервер запущен.'
+        : 'Ошибка сети при получении CSRF токена.';
+    throw new ApiNetworkError(errorMessage, error);
+  }
+
+  if (!response.ok) {
+    throw new ApiHttpError(
+      `Не удалось получить CSRF токен: ${response.status} ${response.statusText}`,
+      response.status,
+      response.statusText
+    );
+  }
+
+  const data = (await response.json()) as {
+    token?: string;
+    headerName?: string;
+  };
+
+  if (data.token) {
+    cachedCsrfToken = data.token;
+  }
+
+  if (data.headerName) {
+    cachedCsrfHeaderName = data.headerName;
+  }
+}
 
 /**
  * Класс ошибки для сетевых ошибок API.
  */
 export class ApiNetworkError extends Error {
-  constructor(message: string, public readonly originalError?: unknown) {
+  constructor(
+    message: string,
+    public readonly originalError?: unknown
+  ) {
     super(message);
     this.name = 'ApiNetworkError';
   }
@@ -22,7 +81,7 @@ export class ApiHttpError extends Error {
   constructor(
     message: string,
     public readonly status: number,
-    public readonly statusText: string,
+    public readonly statusText: string
   ) {
     super(message);
     this.name = 'ApiHttpError';
@@ -41,11 +100,26 @@ export class ApiHttpError extends Error {
  */
 export async function apiFetch(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<Response> {
   const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
 
   const headers = new Headers(options.headers || {});
+
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Добавляет CSRF-токен для небезопасных методов (POST, PUT, PATCH, DELETE и т.п.)
+  // Spring Security ожидает токен в заголовке X-XSRF-TOKEN (или другом, если переопределён).
+  if (
+    !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method) &&
+    !headers.has(CSRF_HEADER_NAME)
+  ) {
+    await ensureCsrfTokenLoaded();
+
+    if (cachedCsrfToken) {
+      headers.set(cachedCsrfHeaderName, cachedCsrfToken);
+    }
+  }
 
   // Устанавливаем Content-Type для JSON, если не указан и есть тело
   if (
@@ -76,7 +150,7 @@ export async function apiFetch(
   // Если получили 401, пользователь не авторизован
   if (response.status === 401) {
     const authStore = await import('./stores/authStore').then((m) =>
-      m.useAuthStore(),
+      m.useAuthStore()
     );
     authStore.isAuthenticated = false;
     authStore.user = null;
@@ -85,9 +159,10 @@ export async function apiFetch(
   // Если получили ошибку HTTP (4xx, 5xx), выбрасываем исключение
   if (!response.ok) {
     let errorMessage = `Ошибка сервера: ${response.status} ${response.statusText}`;
-    
+
     if (response.status === 404) {
-      errorMessage = 'Сервер недоступен или эндпоинт не найден. Проверьте, что сервер запущен.';
+      errorMessage =
+        'Сервер недоступен или эндпоинт не найден. Проверьте, что сервер запущен.';
     } else if (response.status >= 500) {
       errorMessage = 'Внутренняя ошибка сервера. Попробуйте позже.';
     }
@@ -97,4 +172,3 @@ export async function apiFetch(
 
   return response;
 }
-
