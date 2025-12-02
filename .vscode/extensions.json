@@ -3,6 +3,7 @@
     "Vue.volar",
     "github.vscode-github-actions",
     "gruntfuggly.todo-tree",
-    "dbaeumer.vscode-eslint"
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
   ]
 }

@@ -20,14 +20,14 @@
   justify-content: center;
   min-height: 100vh;
   padding: 2rem;
-  background: var(--vf-color-bg, #ffffff);
+  //background: var(--vf-color-bg, #ffffff);
 }
 
 .thank-you-content {
   text-align: center;
   max-width: 600px;
   padding: 3rem;
-  background: var(--vf-color-bg-secondary, #f8f9fa);
+  //background: var(--vf-color-bg-secondary, #f8f9fa);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
