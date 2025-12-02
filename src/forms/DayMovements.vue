@@ -19,13 +19,12 @@
             <FormStep
               name="page0"
               :elements="[
-                'agenix',
+                'birthday',
                 'gender',
                 'socialStatus',
-                'transportationCostsContainer',
                 'coordinatesAddress',
+                'transportationCostsContainer',
                 'financialSituationContainer',
-                'baseComment',
               ]"
               label="Общая информация"
               :labels="{
@@ -46,18 +45,16 @@
             />
           </FormSteps>
           <FormElements>
-            <TextElement
-              name="agenix"
-              input-type="number"
-              :rules="['required', 'min:7', 'max:80', 'integer']"
-              autocomplete="off"
-              label="Возраст"
-              placeholder="18"
-              :force-numbers="true"
+            <DateElement
+              name="birthday"
+              label="День рождения"
+              :floating="false"
+              min="1956-12-01"
+              max="2018-12-01"
+              :rules="['required']"
               :columns="{
                 container: 6,
               }"
-              :floating="false"
             />
             <SelectElement
               name="gender"
@@ -69,7 +66,6 @@
               label="Пол"
               :rules="['required']"
             />
-
             <SelectElement
               name="socialStatus"
               :native="false"
@@ -78,37 +74,6 @@
               :items="enumToOptions(SocialStatus)"
               :rules="['required']"
             />
-            <GroupElement
-              name="transportationCostsContainer"
-              label="Расходы на транспорт"
-            >
-              <TextElement
-                name="transportationCostMin"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:20000', 'integer']"
-                autocomplete="off"
-                label="Mинимум"
-                placeholder="0"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="0"
-              />
-              <TextElement
-                name="transportationCostMax"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:20000', 'integer']"
-                autocomplete="off"
-                label="Максимум"
-                placeholder="3000"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="3000"
-              />
-            </GroupElement>
             <SelectElement
               name="coordinatesAddress"
               :items="getAddressItems"
@@ -128,6 +93,39 @@
               :rules="['required', precise]"
             />
             <GroupElement
+              name="transportationCostsContainer"
+              label="Расходы на транспорт"
+            >
+              <TextElement
+                name="transportationCostMin"
+                input-type="number"
+                :rules="['required', 'min:0', 'max:20000', 'integer']"
+                autocomplete="off"
+                :floating="false"
+                label="Mинимум"
+                placeholder="0"
+                :force-numbers="true"
+                :columns="{
+                  container: 6,
+                }"
+                default="0"
+              />
+              <TextElement
+                name="transportationCostMax"
+                input-type="number"
+                :rules="['required', 'min:0', 'max:20000', 'integer']"
+                autocomplete="off"
+                label="Максимум"
+                :floating="false"
+                placeholder="3000"
+                :force-numbers="true"
+                :columns="{
+                  container: 6,
+                }"
+                default="3000"
+              />
+            </GroupElement>
+            <GroupElement
               name="financialSituationContainer"
               label="Ежемесячный доход"
             >
@@ -137,6 +135,7 @@
                 :rules="['required', 'min:0', 'max:250000', 'integer']"
                 autocomplete="off"
                 label="Минимум"
+                :floating="false"
                 placeholder="0"
                 :force-numbers="true"
                 :columns="{
@@ -151,6 +150,7 @@
                 :rules="['required', 'min:0', 'max:250000', 'integer']"
                 autocomplete="off"
                 label="Максимум"
+                :floating="false"
                 placeholder="50000"
                 :force-numbers="true"
                 :columns="{
@@ -160,11 +160,6 @@
                 description="Максимум. Установить как минимум если доход фиксированный."
               />
             </GroupElement>
-            <TextareaElement
-              name="baseComment"
-              label="Комментарий"
-              description="Код предприятия"
-            />
             <StaticElement
               name="html"
               content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
@@ -300,6 +295,7 @@
                       autocomplete="off"
                       label="Суммарное время ожидания при пересадке / пересадках (в минутах)"
                       default="0"
+                      :floating="false"
                     />
                     <DateElement
                       name="departureTime"
@@ -533,9 +529,27 @@ async function prefillFromProfile(): Promise<void> {
 
     const current = (data.value || {}) as Record<string, unknown>;
 
+    // День рождения
+    if (profile.birthday) {
+      current.birthday = profile.birthday;
+    }
+
     // Пол
     if (profile.gender) {
       current.gender = profile.gender;
+    }
+
+    // Социальное положение
+    if (profile.socialStatus) {
+      current.socialStatus = profile.socialStatus;
+    }
+
+    // Расходы на транспорт
+    if (typeof profile.transportationCostMin === 'number') {
+      current.transportationCostMin = profile.transportationCostMin;
+    }
+    if (typeof profile.transportationCostMax === 'number') {
+      current.transportationCostMax = profile.transportationCostMax;
     }
 
     // Доход: min/maxSalary -> financialSituationMin/Max
