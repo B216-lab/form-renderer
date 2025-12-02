@@ -160,5 +160,80 @@ export const useAuthStore = defineStore('auth', {
         this.isLoading = false;
       }
     },
+
+    /**
+     * Запрашивает одноразовый токен входа для указанного email.
+     * В ответе возвращает токен и время его истечения.
+     */
+    async requestOneTimeToken(
+      email: string
+    ): Promise<{ token: string; expiresAt: string }> {
+      this.isLoading = true;
+      try {
+        const response = await apiFetch('/api/v1/auth/ott', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+        return {
+          token: data.token as string,
+          expiresAt: data.expiresAt as string,
+        };
+      } catch (error) {
+        if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          handleApiError(error);
+          throw error;
+        }
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Не удалось запросить одноразовый токен';
+        throw new Error(message);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    /**
+     * Выполняет вход по одноразовому токену.
+     *
+     * @param token одноразовый токен входа
+     * @throws Error если вход не удался
+     */
+    async loginWithOneTimeToken(token: string): Promise<void> {
+      this.isLoading = true;
+      try {
+        const response = await apiFetch('/api/v1/auth/submit-ott', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token }),
+        });
+
+        const data = await response.json();
+        this.isAuthenticated = true;
+        this.user = {
+          username: data.username,
+          authorities: data.authorities || [],
+        };
+      } catch (error) {
+        if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          handleApiError(error);
+          throw error;
+        }
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Не удалось выполнить вход по одноразовому токену';
+        throw new Error(message);
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 });
