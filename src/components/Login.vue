@@ -8,49 +8,12 @@
         size="large"
         :style="cardStyle"
       >
-        <template #header>
-          <n-space
-            vertical
-            :size="4"
-            align="center"
-          >
-            <span :style="titleStyle">
-              {{
-                isRegisterMode
-                  ? 'Создание аккаунта'
-                  : isOttMode
-                    ? 'Вход по одноразовому коду'
-                    : 'Вход в систему'
-              }}
-            </span>
-          </n-space>
-        </template>
-
-        <n-tabs
-          v-model:value="authMode"
-          type="segment"
-          size="large"
-        >
-          <n-tab-pane
-            name="login"
-            tab="Вход"
-          />
-          <n-tab-pane
-            name="register"
-            tab="Регистрация"
-          />
-          <n-tab-pane
-            name="ott"
-            tab="Одноразовый код"
-          />
-        </n-tabs>
-
         <n-form
           layout="vertical"
           :show-feedback="false"
           @submit.prevent="handleSubmit"
         >
-          <n-form-item label="Email">
+          <n-form-item :show-label="false">
             <n-input
               v-model:value="email"
               type="text"
@@ -89,7 +52,7 @@
 
           <n-form-item
             v-if="isOttMode && tokenRequested"
-            label="Код из письма"
+            :show-label="false"
           >
             <n-input
               v-model:value="ottToken"
@@ -151,10 +114,13 @@
             </n-alert>
           </n-form-item>
 
-          <n-form-item :show-label="false">
+          <n-form-item
+            :show-label="false"
+            :style="buttonContainerStyle"
+          >
             <n-space
               vertical
-              :size="12"
+              :size="16"
             >
               <n-button
                 v-if="isOttMode && !tokenRequested"
@@ -204,8 +170,6 @@ import {
   NLayout,
   NLayoutContent,
   NSpace,
-  NTabPane,
-  NTabs,
 } from 'naive-ui';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -325,7 +289,7 @@ onMounted(() => {
   ottToken.value = '';
   tokenRequested.value = false;
   devToken.value = '';
-  authMode.value = 'login';
+  authMode.value = 'ott';
 });
 
 const layoutStyle: CSSProperties = {
@@ -347,11 +311,10 @@ const cardStyle: CSSProperties = {
   margin: '0 auto',
 };
 
-const titleStyle: CSSProperties = {
-  fontSize: '1.5rem',
-  fontWeight: 600,
-  textAlign: 'center',
-  display: 'inline-block',
+const buttonContainerStyle: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: '16px',
 };
 </script>
 
