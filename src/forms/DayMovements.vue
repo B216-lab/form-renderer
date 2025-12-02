@@ -469,6 +469,7 @@ import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
 import { Validator } from '@vueform/vueform';
 import type { DaDataAddressSuggestion } from 'react-dadata';
 import SuccessScreen from '@/components/SuccessScreen.vue';
+import { apiFetch, ApiHttpError, ApiNetworkError } from '@/api';
 
 const precise = class extends Validator {
   check(suggestion: DaDataAddressSuggestion | null) {
@@ -488,10 +489,6 @@ const precise = class extends Validator {
   }
 };
 
-const prepare = (form$: Vueform) => {
-  console.log(form$.data);
-};
-
 const store = useFormsStore();
 
 const data = computed({
@@ -500,33 +497,155 @@ const data = computed({
 });
 
 const form$ = ref<Vueform | null>(null);
-onMounted(async () => {
-  if (!form$.value) {
+
+/**
+ * Загружает сохранённую форму из localStorage, включая все шаги (включая movements).
+ */
+async function loadStoredForm(): Promise<boolean> {
+  if (!form$.value) return false;
+
+  const storedForm: string | null = localStorage.getItem('form');
+  if (!storedForm) return false;
+
+  try {
+    const parsedData = JSON.parse(storedForm);
+    await form$.value.load(parsedData);
+    return true;
+  } catch {
+    localStorage.removeItem('form');
+    return false;
+  }
+}
+
+/**
+ * Предзаполняет форму данными из профиля пользователя (только первая страница).
+ */
+async function prefillFromProfile(): Promise<void> {
+  if (!form$.value) return;
+
+  try {
+    const response = await apiFetch('/api/v1/auth/me', { method: 'GET' });
+    const profile = await response.json();
+
+    if (profile.error) {
+      return; // Неавторизованный пользователь
+    }
+
+    const current = (data.value || {}) as Record<string, unknown>;
+
+    // Пол
+    if (profile.gender) {
+      current.gender = profile.gender;
+    }
+
+    // Доход: min/maxSalary -> financialSituationMin/Max
+    if (typeof profile.minSalary === 'number') {
+      current.financialSituationMin = profile.minSalary;
+    }
+    if (typeof profile.maxSalary === 'number') {
+      current.financialSituationMax = profile.maxSalary;
+    }
+
+    // Адрес: сопоставление подсказки DaData по homeReadablePlace и координатам
+    await prefillAddressFromProfile(current, profile);
+
+    data.value = current;
+  } catch (err) {
+    if (err instanceof ApiHttpError || err instanceof ApiNetworkError) {
+      console.warn('[DayMovements] Unable to prefill from user profile', err);
+    }
+  }
+}
+
+/**
+ * Предзаполняет поле coordinatesAddress из профиля пользователя.
+ * Поддерживает GeoJSON Point формат: {"type": "Point", "coordinates": [lon, lat]}
+ */
+async function prefillAddressFromProfile(
+  current: Record<string, unknown>,
+  profile: Record<string, unknown>
+): Promise<void> {
+  if (!profile.homeReadablePlace || !profile.homePlace) {
     return;
   }
 
-  const data: string | null = localStorage.getItem('form');
-  if (data) {
-    try {
-      const parsedData = JSON.parse(data);
-      await form$.value.load(parsedData);
-    } catch {
-      localStorage.removeItem('form');
+  const homeReadablePlace = profile.homeReadablePlace as string;
+  const homePlace = profile.homePlace as {
+    type?: string;
+    coordinates?: [number, number];
+    data?: { geo_lat?: string; geo_lon?: string };
+    [key: string]: unknown;
+  };
+
+  try {
+    const suggestions = await getAddressItems(homeReadablePlace);
+
+    // Извлекает координаты из GeoJSON Point или DaData формата
+    let storedLat: string | undefined;
+    let storedLon: string | undefined;
+
+    if (homePlace.type === 'Point' && Array.isArray(homePlace.coordinates)) {
+      // GeoJSON Point: coordinates = [longitude, latitude]
+      storedLon = homePlace.coordinates[0]?.toString();
+      storedLat = homePlace.coordinates[1]?.toString();
+    } else if (homePlace.data) {
+      // DaData формат (для обратной совместимости)
+      storedLat = homePlace.data.geo_lat;
+      storedLon = homePlace.data.geo_lon;
     }
-  } else if (import.meta.env.DEV) {
-    const testData =
-      '{"agenix":22,"gender":"MALE","socialStatus":"STUDENT","coordinatesAddress":{"value":"г Ростов-на-Дону, ул Байкальская, д 88","unrestricted_value":"344041, Ростовская обл, г Ростов-на-Дону, ул Байкальская, д 88","data":{"postal_code":"344041","country":"Россия","country_iso_code":"RU","federal_district":"Южный","region_fias_id":"f10763dc-63e3-48db-83e1-9c566fe3092b","region_kladr_id":"6100000000000","region_iso_code":"RU-ROS","region_with_type":"Ростовская обл","region_type":"обл","region_type_full":"область","region":"Ростовская","area_fias_id":null,"area_kladr_id":null,"area_with_type":null,"area_type":null,"area_type_full":null,"area":null,"city_fias_id":"c1cfe4b9-f7c2-423c-abfa-6ed1c05a15c5","city_kladr_id":"6100000100000","city_with_type":"г Ростов-на-Дону","city_type":"г","city_type_full":"город","city":"Ростов-на-Дону","city_area":null,"city_district_fias_id":null,"city_district_kladr_id":null,"city_district_with_type":null,"city_district_type":null,"city_district_type_full":null,"city_district":null,"settlement_fias_id":null,"settlement_kladr_id":null,"settlement_with_type":null,"settlement_type":null,"settlement_type_full":null,"settlement":null,"street_fias_id":"40e5bb3e-2ce7-4263-9318-40111507b3fd","street_kladr_id":"61000001000025600","street_with_type":"ул Байкальская","street_type":"ул","street_type_full":"улица","street":"Байкальская","stead_fias_id":null,"stead_cadnum":null,"stead_type":null,"stead_type_full":null,"stead":null,"house_fias_id":"1817b5e3-949b-4be8-a6c6-d7eb63022319","house_kladr_id":"6100000100002560144","house_cadnum":null,"house_flat_count":null,"house_type":"д","house_type_full":"дом","house":"88","block_type":null,"block_type_full":null,"block":null,"entrance":null,"floor":null,"flat_fias_id":null,"flat_cadnum":null,"flat_type":null,"flat_type_full":null,"flat":null,"flat_area":null,"square_meter_price":null,"flat_price":null,"room_fias_id":null,"room_cadnum":null,"room_type":null,"room_type_full":null,"room":null,"postal_box":null,"fias_id":"1817b5e3-949b-4be8-a6c6-d7eb63022319","fias_code":null,"fias_level":"8","fias_actuality_state":"0","kladr_id":"6100000100002560144","geoname_id":"501175","capital_marker":"2","okato":"60401000000","oktmo":"60701000001","tax_office":"6194","tax_office_legal":"6194","timezone":null,"geo_lat":"47.2409159","geo_lon":"39.6266622","beltway_hit":null,"beltway_distance":null,"metro":null,"divisions":null,"qc_geo":"0","qc_complete":null,"qc_house":null,"history_values":null,"unparsed_parts":null,"source":null,"qc":null}},"baseComment":"это тест","dateMovements":"2025-11-12","movements":[{"typeMovement":"ON_FOOT","transport":[],"numberPeopleInCar":"1","pedestrianApproachtoStartingStopOrParkingLot":null,"waitingTimeForTransport":null,"numberOfTransfers":"0","waitingTimeBetweenTransfers":"85","departureTime":"12:10","departurePlace":"HOME_RESIDENCE","coordinatesDepartureAddress":null,"arrivalTime":"13:35","arrivalPlace":"DAYCARE_CENTER","pedestrianApproachFromFinalStopOrParking":null,"number":null,"coordinatesArrivalAddress":{"value":"Приморский край, г Находка, тер. ГСК Карс, д 8","unrestricted_value":"Приморский край, г Находка, тер. ГСК Карс, д 8","data":{"postal_code":null,"country":"Россия","country_iso_code":"RU","federal_district":"Дальневосточный","region_fias_id":"43909681-d6e1-432d-b61f-ddac393cb5da","region_kladr_id":"2500000000000","region_iso_code":"RU-PRI","region_with_type":"Приморский край","region_type":"край","region_type_full":"край","region":"Приморский","area_fias_id":null,"area_kladr_id":null,"area_with_type":null,"area_type":null,"area_type_full":null,"area":null,"city_fias_id":"225a3506-35aa-4456-8bd7-244bdfbc4eaf","city_kladr_id":"2500000400000","city_with_type":"г Находка","city_type":"г","city_type_full":"город","city":"Находка","city_area":null,"city_district_fias_id":null,"city_district_kladr_id":null,"city_district_with_type":null,"city_district_type":null,"city_district_type_full":null,"city_district":null,"settlement_fias_id":"150bc38e-49c5-4f17-a541-d18065b6e709","settlement_kladr_id":"25000004000072400","settlement_with_type":"тер. ГСК Карс","settlement_type":"тер. ГСК","settlement_type_full":"территория гск","settlement":"Карс","street_fias_id":null,"street_kladr_id":null,"street_with_type":null,"street_type":null,"street_type_full":null,"street":null,"stead_fias_id":null,"stead_cadnum":null,"stead_type":null,"stead_type_full":null,"stead":null,"house_fias_id":null,"house_kladr_id":null,"house_cadnum":null,"house_flat_count":null,"house_type":"д","house_type_full":"дом","house":"8","block_type":null,"block_type_full":null,"block":null,"entrance":null,"floor":null,"flat_fias_id":null,"flat_cadnum":null,"flat_type":null,"flat_type_full":null,"flat":null,"flat_area":null,"square_meter_price":null,"flat_price":null,"room_fias_id":null,"room_cadnum":null,"room_type":null,"room_type_full":null,"room":null,"postal_box":null,"fias_id":"150bc38e-49c5-4f17-a541-d18065b6e709","fias_code":null,"fias_level":"65","fias_actuality_state":"0","kladr_id":"25000004000072400","geoname_id":"2019528","capital_marker":"0","okato":"05414000000","oktmo":"05714000001","tax_office":"2508","tax_office_legal":"2508","timezone":null,"geo_lat":"42.82406","geo_lon":"132.8928168","beltway_hit":null,"beltway_distance":null,"metro":null,"divisions":null,"qc_geo":"4","qc_complete":null,"qc_house":null,"history_values":null,"unparsed_parts":null,"source":null,"qc":null}},"textarea":"странный переход"}],"financialSituationMin":25000,"financialSituationMax":48000,"transportationCostMin":15844,"transportationCostMax":20000}';
-    await form$.value.load(JSON.parse(testData));
-    form$.value.clean();
+
+    if (!storedLat || !storedLon) {
+      return;
+    }
+
+    const matchedSuggestion = (suggestions as DaDataAddressSuggestion[]).find(
+      (s) => {
+        const d = s.data as { geo_lat?: string; geo_lon?: string };
+        return d?.geo_lat === storedLat && d?.geo_lon === storedLon;
+      }
+    );
+
+    if (matchedSuggestion) {
+      current.coordinatesAddress = matchedSuggestion;
+    } else {
+      console.warn(
+        '[DaData] Stored homePlace coordinates not found among suggestions for homeReadablePlace',
+        { homeReadablePlace, homePlace }
+      );
+    }
+  } catch (err) {
+    if (!(err instanceof ApiHttpError) && !(err instanceof ApiNetworkError)) {
+      console.warn('[DaData] Unexpected error during address prefill', err);
+    }
+  }
+}
+
+/**
+ * Настраивает слушатель изменений формы для сохранения в localStorage.
+ */
+function setupFormChangeListener(): void {
+  if (!form$.value) return;
+
+  form$.value.on('change', () => {
+    if (form$.value) {
+      localStorage.setItem('form', JSON.stringify(form$.value.data));
+    }
+  });
+}
+
+onMounted(async () => {
+  if (!form$.value) return;
+
+  // Сначала пытается загрузить сохранённую форму (включая movements)
+  const hasStoredForm = await loadStoredForm();
+
+  // Если нет сохранённой формы, предзаполняет из профиля
+  if (!hasStoredForm) {
+    await prefillFromProfile();
   }
 
-  if (form$.value) {
-    form$.value.on('change', () => {
-      if (form$.value) {
-        localStorage.setItem('form', JSON.stringify(form$.value.data));
-      }
-    });
-  }
+  // Настраивает автосохранение изменений
+  setupFormChangeListener();
 });
 
 const { getAddressItems, ADDRESS_DELAY, DEFAULT_MIN_CHARS } =
@@ -543,6 +662,7 @@ const handleSuccess = () => {
 
 <style lang="scss">
 @import '@vueform/vueform/themes/vueform/scss/index.scss';
+@import '@/styles/callout.scss';
 
 .day-movements {
   padding: 15px;
@@ -568,55 +688,6 @@ const handleSuccess = () => {
   :after,
   * {
     @include vf-dark-vars;
-  }
-}
-
-.info-callout {
-  background: var(--vf-color-bg-secondary, #f1f5f9);
-  border-left: 4px solid var(--vf-color-primary, #3b82f6);
-  padding: 1.25rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 6px;
-  color: var(--vf-color-text, #0f172a);
-  line-height: 1.6;
-  font-size: 1rem;
-}
-
-.info-callout__title {
-  display: block;
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--vf-color-primary, #3b82f6);
-}
-
-.info-callout p {
-  margin: 0;
-  color: var(--vf-color-text, #0f172a);
-}
-
-.info-callout a {
-  color: var(--vf-color-primary, #3b82f6);
-  text-decoration: underline;
-}
-
-.info-callout a:hover {
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .info-callout {
-    background: var(--vf-color-bg-secondary, #111827);
-    border-color: var(--vf-color-primary, #60a5fa);
-    color: var(--vf-color-text, #f8fafc);
-  }
-
-  .info-callout__title {
-    color: var(--vf-color-primary, #60a5fa);
-  }
-
-  .info-callout p {
-    color: var(--vf-color-text, #f8fafc);
   }
 }
 </style>
