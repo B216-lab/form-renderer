@@ -163,11 +163,9 @@ export const useAuthStore = defineStore('auth', {
 
     /**
      * Запрашивает одноразовый токен входа для указанного email.
-     * В ответе возвращает токен и время его истечения.
+     * В ответе возвращает только время его истечения.
      */
-    async requestOneTimeToken(
-      email: string
-    ): Promise<{ token: string; expiresAt: string }> {
+    async requestOneTimeToken(email: string): Promise<{ expiresAt: string }> {
       this.isLoading = true;
       try {
         const response = await apiFetch('/api/v1/auth/ott', {
@@ -180,7 +178,6 @@ export const useAuthStore = defineStore('auth', {
 
         const data = await response.json();
         return {
-          token: data.token as string,
           expiresAt: data.expiresAt as string,
         };
       } catch (error) {

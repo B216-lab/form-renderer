@@ -63,19 +63,6 @@
           </n-form-item>
 
           <n-form-item
-            v-if="isOttMode && tokenRequested && devToken"
-            :show-label="false"
-          >
-            <n-alert
-              type="info"
-              title="Dev режим"
-              closable
-            >
-              Токен для разработки: {{ devToken }}
-            </n-alert>
-          </n-form-item>
-
-          <n-form-item
             v-if="isOttMode && tokenRequested"
             :show-label="false"
           >
@@ -186,7 +173,6 @@ const errorMessage = ref('');
 const confirmPassword = ref('');
 const ottToken = ref('');
 const tokenRequested = ref(false);
-const devToken = ref('');
 type AuthMode = 'login' | 'register' | 'ott';
 const authMode = ref<AuthMode>('login');
 
@@ -202,10 +188,6 @@ const passwordsMismatch = computed(
 );
 
 const isSubmitDisabled = computed(() => {
-  // В dev-режиме кнопка всегда разблокирована
-  if (import.meta.env.DEV) {
-    return false;
-  }
   if (authStore.isLoading) return true;
   if (isOttMode.value) {
     return !tokenRequested.value || !ottToken.value;
@@ -221,7 +203,6 @@ watch(authMode, (mode) => {
   errorMessage.value = '';
   tokenRequested.value = false;
   ottToken.value = '';
-  devToken.value = '';
   if (mode === 'login') {
     confirmPassword.value = '';
   }
@@ -234,12 +215,8 @@ const handleRequestToken = async () => {
 
   errorMessage.value = '';
   try {
-    const result = await authStore.requestOneTimeToken(email.value);
+    await authStore.requestOneTimeToken(email.value);
     tokenRequested.value = true;
-    // В dev режиме показываем токен для удобства
-    if (import.meta.env.DEV) {
-      devToken.value = result.token;
-    }
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Не удалось отправить код';
@@ -288,7 +265,6 @@ onMounted(() => {
   confirmPassword.value = '';
   ottToken.value = '';
   tokenRequested.value = false;
-  devToken.value = '';
   authMode.value = 'ott';
 });
 
