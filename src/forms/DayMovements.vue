@@ -36,7 +36,7 @@
             />
             <FormStep
               name="page1"
-              :elements="['html', 'dateMovements', 'movements']"
+              :elements="['html', 'movementsDate', 'movements']"
               label="Передвижения"
               :labels="{
                 previous: 'Назад',
@@ -69,13 +69,13 @@
             <SelectElement
               name="socialStatus"
               :native="false"
-              label="Социальное положение"
+              label="Социальный статус"
               :caret="false"
               :items="enumToOptions(SocialStatus)"
               :rules="['required']"
             />
             <SelectElement
-              name="coordinatesAddress"
+              name="homeAddress"
               :items="getAddressItems"
               :resolve-on-load="false"
               :delay="ADDRESS_DELAY"
@@ -97,12 +97,12 @@
               label="Расходы на транспорт"
             >
               <TextElement
-                name="transportationCostMin"
+                name="transportCostMin"
                 input-type="number"
                 :rules="['required', 'min:0', 'max:20000', 'integer']"
                 autocomplete="off"
                 :floating="false"
-                label="Mинимум"
+                label="Минимум, ₽/мес"
                 placeholder="0"
                 :force-numbers="true"
                 :columns="{
@@ -111,11 +111,11 @@
                 default="0"
               />
               <TextElement
-                name="transportationCostMax"
+                name="transportCostMax"
                 input-type="number"
                 :rules="['required', 'min:0', 'max:20000', 'integer']"
                 autocomplete="off"
-                label="Максимум"
+                label="Максимум, ₽/мес"
                 :floating="false"
                 placeholder="3000"
                 :force-numbers="true"
@@ -130,11 +130,11 @@
               label="Ежемесячный доход"
             >
               <TextElement
-                name="financialSituationMin"
+                name="incomeMin"
                 input-type="number"
                 :rules="['required', 'min:0', 'max:250000', 'integer']"
                 autocomplete="off"
-                label="Минимум"
+                label="Минимум, ₽/мес"
                 :floating="false"
                 placeholder="0"
                 :force-numbers="true"
@@ -145,11 +145,11 @@
                 description="Минимум. Установить, если доход фиксированный."
               />
               <TextElement
-                name="financialSituationMax"
+                name="incomeMax"
                 input-type="number"
                 :rules="['required', 'min:0', 'max:250000', 'integer']"
                 autocomplete="off"
-                label="Максимум"
+                label="Максимум, ₽/мес"
                 :floating="false"
                 placeholder="50000"
                 :force-numbers="true"
@@ -162,13 +162,13 @@
             </GroupElement>
             <StaticElement
               name="html"
-              content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
+              content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
               :expressions="true"
               add-class="info-callout"
             />
             <DateElement
-              name="dateMovements"
-              label="Дата всех передвижений, описываемых далее в форме"
+              name="movementsDate"
+              label="Дата передвижений"
               :rules="['required']"
               field-name="date_id"
               description="Нужно будет описать передвижения за этот день"
@@ -184,10 +184,11 @@
                 <ObjectElement :name="index">
                   <GroupElement name="container">
                     <RadiogroupElement
-                      name="typeMovement"
+                      name="movementType"
                       view="tabs"
                       default="ON_FOOT"
                       :items="enumToOptions(TypeMovement)"
+                      label="Способ передвижения"
                       :rules="['required']"
                     />
                     <MultiselectElement
@@ -231,7 +232,7 @@
                       default="1"
                     />
                     <TextElement
-                      name="pedestrianApproachtoStartingStopOrParkingLot"
+                      name="walkToStartMinutes"
                       input-type="number"
                       :rules="[
                         'nullable',
@@ -241,18 +242,18 @@
                         'integer',
                       ]"
                       autocomplete="off"
-                      label="Время пешего пути к начальной остановке / парковке (в минутах)"
+                      label="Пешком до начальной остановки / парковки, мин"
                       :force-numbers="true"
                       :conditions="[
                         [
-                          'movements.*.container.typeMovement',
+                          'movements.*.container.movementType',
                           'in',
                           ['TRANSPORT'],
                         ],
                       ]"
                     />
                     <TextElement
-                      name="waitingTimeForTransport"
+                      name="waitAtStartMinutes"
                       input-type="number"
                       :rules="[
                         'nullable',
@@ -262,11 +263,11 @@
                         'integer',
                       ]"
                       autocomplete="off"
-                      label="Время ожидания транспорта на начальной остановке (в минутах)"
+                      label="Ожидание на начальной остановке, мин"
                       :force-numbers="true"
                       :conditions="[
                         [
-                          'movements.*.container.typeMovement',
+                          'movements.*.container.movementType',
                           'in',
                           ['TRANSPORT'],
                         ],
@@ -282,18 +283,18 @@
                       default="0"
                       :conditions="[
                         [
-                          'movements.*.container.typeMovement',
+                          'movements.*.container.movementType',
                           'in',
                           ['TRANSPORT'],
                         ],
                       ]"
                     />
                     <TextElement
-                      name="waitingTimeBetweenTransfers"
+                      name="waitBetweenTransfersMinutes"
                       input-type="number"
                       :rules="['required', 'min:0', 'max:180', 'integer']"
                       autocomplete="off"
-                      label="Суммарное время ожидания при пересадке / пересадках (в минутах)"
+                      label="Ожидание при пересадках, мин"
                       default="0"
                       :floating="false"
                     />
@@ -321,7 +322,7 @@
                       :rules="['required']"
                     />
                     <SelectElement
-                      name="coordinatesDepartureAddress"
+                      name="departureAddress"
                       :items="getAddressItems"
                       :delay="ADDRESS_DELAY"
                       :search="true"
@@ -377,35 +378,35 @@
                       :rules="['required']"
                     />
                     <TextElement
-                      name="pedestrianApproachFromFinalStopOrParking"
+                      name="walkFromFinishMinutes"
                       input-type="number"
                       :rules="['required', 'min:0', 'max:180', 'integer']"
                       autocomplete="off"
-                      label="Время пешего хода от конечной остановки / парковки до места прибытия (в минутах)"
+                      label="Пешком от конечной остановки / парковки до места прибытия, мин"
                       :conditions="[
                         [
-                          'movements.*.container.typeMovement',
+                          'movements.*.container.movementType',
                           'in',
                           ['TRANSPORT'],
                         ],
                       ]"
                     />
                     <TextElement
-                      name="number"
+                      name="tripCost"
                       input-type="number"
                       :rules="['nullable', 'min:0', 'max:25000', 'integer']"
                       autocomplete="off"
-                      label="Стоимость поездки / парковки"
+                      label="Стоимость поездки / парковки, ₽"
                       :conditions="[
                         [
-                          'movements.*.container.typeMovement',
+                          'movements.*.container.movementType',
                           'in',
                           ['TRANSPORT'],
                         ],
                       ]"
                     />
                     <SelectElement
-                      name="coordinatesArrivalAddress"
+                      name="arrivalAddress"
                       :items="getAddressItems"
                       :delay="ADDRESS_DELAY"
                       :search="true"
@@ -423,7 +424,7 @@
                       :rules="[
                         'required',
                         precise,
-                        'different:movements.*.container.coordinatesDepartureAddress',
+                        'different:movements.*.container.departureAddress',
                       ]"
                       :conditions="[
                         [
@@ -546,18 +547,18 @@ async function prefillFromProfile(): Promise<void> {
 
     // Расходы на транспорт
     if (typeof profile.transportationCostMin === 'number') {
-      current.transportationCostMin = profile.transportationCostMin;
+      current.transportCostMin = profile.transportationCostMin;
     }
     if (typeof profile.transportationCostMax === 'number') {
-      current.transportationCostMax = profile.transportationCostMax;
+      current.transportCostMax = profile.transportationCostMax;
     }
 
-    // Доход: min/maxSalary -> financialSituationMin/Max
+    // Доход: min/maxSalary -> incomeMin/Max
     if (typeof profile.minSalary === 'number') {
-      current.financialSituationMin = profile.minSalary;
+      current.incomeMin = profile.minSalary;
     }
     if (typeof profile.maxSalary === 'number') {
-      current.financialSituationMax = profile.maxSalary;
+      current.incomeMax = profile.maxSalary;
     }
 
     // Адрес: сопоставление подсказки DaData по homeReadablePlace и координатам

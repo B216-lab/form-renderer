@@ -13,132 +13,137 @@
           :show-feedback="false"
           @submit.prevent="handleSubmit"
         >
-          <n-form-item :show-label="false">
-            <n-input
-              v-model:value="email"
-              type="text"
-              inputmode="email"
-              placeholder="user@example.com"
-              autocomplete="email"
-              :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
-            />
-          </n-form-item>
-
-          <n-form-item
-            v-if="!isOttMode"
-            label="Пароль"
+          <n-space
+            vertical
+            :size="16"
           >
-            <n-input
-              v-model:value="password"
-              type="password"
-              placeholder="Введите пароль"
-              autocomplete="current-password"
-              :disabled="authStore.isLoading"
-            />
-          </n-form-item>
+            <n-form-item :show-label="false">
+              <n-input
+                v-model:value="email"
+                type="text"
+                inputmode="email"
+                placeholder="user@example.com"
+                autocomplete="email"
+                :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
+              />
+            </n-form-item>
 
-          <n-form-item
-            v-if="isRegisterMode"
-            label="Повторите пароль"
-          >
-            <n-input
-              v-model:value="confirmPassword"
-              type="password"
-              placeholder="Повторите пароль"
-              autocomplete="new-password"
-              :disabled="authStore.isLoading"
-            />
-          </n-form-item>
-
-          <n-form-item
-            v-if="isOttMode && tokenRequested"
-            :show-label="false"
-          >
-            <n-input
-              v-model:value="ottToken"
-              type="text"
-              placeholder="Введите код из письма"
-              :disabled="authStore.isLoading"
-            />
-          </n-form-item>
-
-          <n-form-item
-            v-if="isOttMode && tokenRequested"
-            :show-label="false"
-          >
-            <n-alert
-              type="success"
-              title="Код отправлен"
-              closable
+            <n-form-item
+              v-if="!isOttMode"
+              label="Пароль"
             >
-              Код отправлен на {{ email }}. Проверьте почту и введите код.
-            </n-alert>
-          </n-form-item>
+              <n-input
+                v-model:value="password"
+                type="password"
+                placeholder="Введите пароль"
+                autocomplete="current-password"
+                :disabled="authStore.isLoading"
+              />
+            </n-form-item>
 
-          <n-form-item
-            v-if="passwordsMismatch"
-            :show-label="false"
-          >
-            <n-alert
-              type="warning"
-              title="Проверить пароль"
-              closable
+            <n-form-item
+              v-if="isRegisterMode"
+              label="Повторите пароль"
             >
-              Пароли не совпадают
-            </n-alert>
-          </n-form-item>
+              <n-input
+                v-model:value="confirmPassword"
+                type="password"
+                placeholder="Повторите пароль"
+                autocomplete="new-password"
+                :disabled="authStore.isLoading"
+              />
+            </n-form-item>
 
-          <n-form-item
-            v-if="errorMessage"
-            :show-label="false"
-          >
-            <n-alert
-              type="error"
-              closable
-              @close="errorMessage = ''"
+            <n-form-item
+              v-if="isOttMode && tokenRequested"
+              :show-label="false"
             >
-              {{ errorMessage }}
-            </n-alert>
-          </n-form-item>
+              <n-input
+                v-model:value="ottToken"
+                type="text"
+                placeholder="Введите код из письма"
+                :disabled="authStore.isLoading"
+              />
+            </n-form-item>
 
-          <n-form-item
-            :show-label="false"
-            :style="buttonContainerStyle"
-          >
-            <n-space
-              vertical
-              :size="16"
+            <n-form-item
+              v-if="isOttMode && tokenRequested"
+              :show-label="false"
             >
-              <n-button
-                v-if="isOttMode && !tokenRequested"
-                type="primary"
-                size="large"
-                :block="true"
-                :loading="authStore.isLoading"
-                :disabled="!email || authStore.isLoading"
-                @click="handleRequestToken"
+              <n-alert
+                type="success"
+                title="Код отправлен"
+                closable
               >
-                Отправить код
-              </n-button>
-              <n-button
-                v-else
-                type="primary"
-                size="large"
-                :block="true"
-                attr-type="submit"
-                :loading="authStore.isLoading"
-                :disabled="isSubmitDisabled"
+                Код отправлен на {{ email }}. Проверьте почту и введите код.
+              </n-alert>
+            </n-form-item>
+
+            <n-form-item
+              v-if="passwordsMismatch"
+              :show-label="false"
+            >
+              <n-alert
+                type="warning"
+                title="Проверить пароль"
+                closable
               >
-                {{
-                  isRegisterMode
-                    ? 'Зарегистрироваться'
-                    : isOttMode
-                      ? 'Войти'
-                      : 'Войти'
-                }}
-              </n-button>
-            </n-space>
-          </n-form-item>
+                Пароли не совпадают
+              </n-alert>
+            </n-form-item>
+
+            <n-form-item
+              v-if="errorMessage"
+              :show-label="false"
+            >
+              <n-alert
+                type="error"
+                closable
+                @close="errorMessage = ''"
+              >
+                {{ errorMessage }}
+              </n-alert>
+            </n-form-item>
+
+            <n-form-item
+              :show-label="false"
+              :style="buttonContainerStyle"
+            >
+              <n-space
+                vertical
+                :size="16"
+              >
+                <n-button
+                  v-if="isOttMode && !tokenRequested"
+                  type="primary"
+                  size="large"
+                  :block="true"
+                  :loading="authStore.isLoading"
+                  :disabled="!email || authStore.isLoading"
+                  @click="handleRequestToken"
+                >
+                  Отправить код
+                </n-button>
+                <n-button
+                  v-else
+                  type="primary"
+                  size="large"
+                  :block="true"
+                  attr-type="submit"
+                  :loading="authStore.isLoading"
+                  :disabled="isSubmitDisabled"
+                >
+                  {{
+                    isRegisterMode
+                      ? 'Зарегистрироваться'
+                      : isOttMode
+                        ? 'Войти'
+                        : 'Войти'
+                  }}
+                </n-button>
+              </n-space>
+            </n-form-item>
+          </n-space>
         </n-form>
       </n-card>
     </n-layout-content>

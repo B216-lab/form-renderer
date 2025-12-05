@@ -116,8 +116,8 @@
         "container": 6
       }
     },
-    "coordinatesAddress": {
-      "name": "coordinatesAddress",
+    "homeAddress": {
+      "name": "homeAddress",
       "type": "select",
       "items": [
         {
@@ -138,8 +138,8 @@
         "required"
       ]
     },
-    "dateMovements": {
-      "name": "dateMovements",
+    "movementsDate": {
+      "name": "movementsDate",
       "type": "date",
       "builder": {
         "type": "date",
@@ -202,7 +202,7 @@
     "html": {
       "name": "html",
       "type": "static",
-      "content": "<ol>\n<li>\n1. Необходимо внести данные о всех передвижениях за выбранный день {dateMovements} и обязательно учитывать передвижения в пешей доступности (например: 1 - из дома на работу, 2 - с работы в магазин, 3 - из магазина домой, 4 - снова из дома в детский сад и т.д.)\n</li>\n<li>\n2. В каждом передвижении важно выбирать адрес отправления и прибытия из списка, который выпадает в качестве подсказки при вводе адреса (для корректного определения координат местоположения)\n</li>\n</ol>",
+      "content": "<ol>\n<li>\n1. Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности (например: 1 - из дома на работу, 2 - с работы в магазин, 3 - из магазина домой, 4 - снова из дома в детский сад и т.д.)\n</li>\n<li>\n2. В каждом передвижении важно выбирать адрес отправления и прибытия из списка, который выпадает в качестве подсказки при вводе адреса (для корректного определения координат местоположения)\n</li>\n</ol>",
       "builder": {
         "type": "html",
         "label": "Static HTML"
@@ -236,8 +236,8 @@
               "label": "Container"
             },
             "schema": {
-              "typeMovement": {
-                "name": "typeMovement",
+              "movementType": {
+                "name": "movementType",
                 "type": "radiogroup",
                 "view": "tabs",
                 "items": [
@@ -332,8 +332,8 @@
                 ],
                 "default": "1"
               },
-              "pedestrianApproachtoStartingStopOrParkingLot": {
-                "name": "pedestrianApproachtoStartingStopOrParkingLot",
+              "walkToStartMinutes": {
+                "name": "walkToStartMinutes",
                 "type": "text",
                 "inputType": "number",
                 "rules": [
@@ -344,7 +344,7 @@
                   "integer"
                 ],
                 "autocomplete": "off",
-                "label": "Время пешего пути к начальной остановке / парковке (в минутах)",
+                "label": "Пешком до начальной остановки / парковки, мин",
                 "builder": {
                   "type": "number",
                   "label": "Number input"
@@ -352,7 +352,7 @@
                 "forceNumbers": true,
                 "conditions": [
                   [
-                    "movements.*.container.typeMovement",
+                    "movements.*.container.movementType",
                     "in",
                     [
                       1
@@ -360,8 +360,8 @@
                   ]
                 ]
               },
-              "waitingTimeForTransport": {
-                "name": "waitingTimeForTransport",
+              "waitAtStartMinutes": {
+                "name": "waitAtStartMinutes",
                 "type": "text",
                 "inputType": "number",
                 "rules": [
@@ -372,7 +372,7 @@
                   "integer"
                 ],
                 "autocomplete": "off",
-                "label": "Время ожидания транспорта на начальной остановке (в минутах)",
+                "label": "Ожидание на начальной остановке, мин",
                 "builder": {
                   "type": "number",
                   "label": "Number input"
@@ -380,7 +380,7 @@
                 "forceNumbers": true,
                 "conditions": [
                   [
-                    "movements.*.container.typeMovement",
+                    "movements.*.container.movementType",
                     "in",
                     [
                       1
@@ -408,7 +408,7 @@
                 "default": "0",
                 "conditions": [
                   [
-                    "movements.*.container.typeMovement",
+                    "movements.*.container.movementType",
                     "in",
                     [
                       1
@@ -416,8 +416,8 @@
                   ]
                 ]
               },
-              "waitingTimeBetweenTransfers": {
-                "name": "waitingTimeBetweenTransfers",
+              "waitBetweenTransfersMinutes": {
+                "name": "waitBetweenTransfersMinutes",
                 "type": "text",
                 "inputType": "number",
                 "rules": [
@@ -480,8 +480,8 @@
                   "required"
                 ]
               },
-              "coordinatesDepartureAddress": {
-                "name": "coordinatesDepartureAddress",
+              "departureAddress": {
+                "name": "departureAddress",
                 "type": "select",
                 "items": [
                   {
@@ -554,8 +554,8 @@
                   "required"
                 ]
               },
-              "pedestrianApproachFromFinalStopOrParking": {
-                "name": "pedestrianApproachFromFinalStopOrParking",
+              "walkFromFinishMinutes": {
+                "name": "walkFromFinishMinutes",
                 "type": "text",
                 "inputType": "number",
                 "rules": [
@@ -565,14 +565,14 @@
                   "integer"
                 ],
                 "autocomplete": "off",
-                "label": "Время пешего хода от конечной остановки / парковки до места прибытия (в минутах)",
+                "label": "Пешком от конечной остановки / парковки до места прибытия, мин",
                 "builder": {
                   "type": "number",
                   "label": "Number input"
                 },
                 "conditions": [
                   [
-                    "movements.*.container.typeMovement",
+                    "movements.*.container.movementType",
                     "in",
                     [
                       1
@@ -580,8 +580,8 @@
                   ]
                 ]
               },
-              "number": {
-                "name": "number",
+              "tripCost": {
+                "name": "tripCost",
                 "type": "text",
                 "inputType": "number",
                 "rules": [
@@ -591,14 +591,14 @@
                   "integer"
                 ],
                 "autocomplete": "off",
-                "label": "Стоимость поездки / парковки",
+                "label": "Стоимость поездки / парковки, ₽",
                 "builder": {
                   "type": "number",
                   "label": "Number input"
                 },
                 "conditions": [
                   [
-                    "movements.*.container.typeMovement",
+                    "movements.*.container.movementType",
                     "in",
                     [
                       1
@@ -606,8 +606,8 @@
                   ]
                 ]
               },
-              "coordinatesArrivalAddress": {
-                "name": "coordinatesArrivalAddress",
+              "arrivalAddress": {
+                "name": "arrivalAddress",
                 "type": "select",
                 "items": [
                   {
