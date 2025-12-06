@@ -1,11 +1,13 @@
-import { createApp, nextTick } from 'vue';
 import './style.css';
+
+import { createApp, nextTick } from 'vue';
 import App from './App.vue';
 import Vueform from '@vueform/vueform';
 import vueformConfig from './../vueform.config';
 import { createPinia } from 'pinia';
 import router from './router';
 import { useAuthStore } from './stores/authStore';
+import ui from '@nuxt/ui/vue-plugin';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -13,6 +15,7 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(Vueform, vueformConfig);
 app.use(router);
+app.use(ui);
 
 const authStore = useAuthStore();
 

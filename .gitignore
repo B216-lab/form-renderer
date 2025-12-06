@@ -26,3 +26,7 @@ dist-ssr
 .env
 .pnpm-store
 blocking-umrs-back.code-workspace
+
+# Auto-generated type declarations
+auto-imports.d.ts
+components.d.ts

@@ -1,9 +1,10 @@
 {
   "recommendations": [
     "Vue.volar",
-    "github.vscode-github-actions",
     "gruntfuggly.todo-tree",
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "github.vscode-github-actions",
   ]
 }

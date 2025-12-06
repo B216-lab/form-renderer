@@ -1,171 +1,133 @@
 <template>
-  <n-layout
-    :style="layoutStyle"
-    :content-style="layoutContentStyle"
+  <div
+    class="min-h-screen flex items-center justify-center bg-[var(--n-body-color)] px-4"
   >
-    <n-layout-content>
-      <n-card
-        size="large"
-        :style="cardStyle"
-      >
-        <n-form
-          layout="vertical"
-          :show-feedback="false"
+    <UCard class="w-full max-w-md">
+      <div class="space-y-6">
+        <div class="text-center space-y-1">
+          <h1 class="text-xl font-semibold">Вход в систему</h1>
+          <p class="text-sm text-muted">
+            Введите e-mail, чтобы получить одноразовый код входа
+          </p>
+        </div>
+
+        <UForm
+          as="form"
+          class="space-y-4"
           @submit.prevent="handleSubmit"
         >
-          <n-space
-            vertical
-            :size="16"
+          <UFormField
+            label="E-mail"
+            name="email"
           >
-            <n-form-item :show-label="false">
-              <n-input
-                v-model:value="email"
-                type="text"
-                inputmode="email"
-                placeholder="user@example.com"
-                autocomplete="email"
-                :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
-              />
-            </n-form-item>
+            <UInput
+              v-model="email"
+              type="email"
+              autocomplete="email"
+              placeholder="user@example.com"
+              :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
+            />
+          </UFormField>
 
-            <n-form-item
-              v-if="!isOttMode"
-              label="Пароль"
-            >
-              <n-input
-                v-model:value="password"
-                type="password"
-                placeholder="Введите пароль"
-                autocomplete="current-password"
-                :disabled="authStore.isLoading"
-              />
-            </n-form-item>
+          <UFormField
+            v-if="!isOttMode"
+            label="Пароль"
+            name="password"
+          >
+            <UInput
+              v-model="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Введите пароль"
+              :disabled="authStore.isLoading"
+            />
+          </UFormField>
 
-            <n-form-item
-              v-if="isRegisterMode"
-              label="Повторите пароль"
-            >
-              <n-input
-                v-model:value="confirmPassword"
-                type="password"
-                placeholder="Повторите пароль"
-                autocomplete="new-password"
-                :disabled="authStore.isLoading"
-              />
-            </n-form-item>
+          <UFormField
+            v-if="isRegisterMode"
+            label="Повторите пароль"
+            name="confirmPassword"
+          >
+            <UInput
+              v-model="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Повторите пароль"
+              :disabled="authStore.isLoading"
+            />
+          </UFormField>
 
-            <n-form-item
-              v-if="isOttMode && tokenRequested"
-              :show-label="false"
-            >
-              <n-input
-                v-model:value="ottToken"
-                type="text"
-                placeholder="Введите код из письма"
-                :disabled="authStore.isLoading"
-              />
-            </n-form-item>
+          <UFormField
+            v-if="isOttMode && tokenRequested"
+            label="Код из письма"
+            name="ottToken"
+          >
+            <UInput
+              v-model="ottToken"
+              type="password"
+              placeholder="Вставьте или введите код"
+              :disabled="authStore.isLoading"
+              class="font-mono text-xs"
+            />
+          </UFormField>
 
-            <n-form-item
-              v-if="isOttMode && tokenRequested"
-              :show-label="false"
-            >
-              <n-alert
-                type="success"
-                title="Код отправлен"
-                closable
-              >
-                Код отправлен на {{ email }}. Проверьте почту и введите код.
-              </n-alert>
-            </n-form-item>
+          <UAlert
+            v-if="isOttMode && tokenRequested"
+            color="success"
+            variant="subtle"
+            title="Код отправлен"
+            :description="`Код отправлен на ${email || 'указанный e-mail'}. Проверьте почту и введите код.`"
+          />
 
-            <n-form-item
-              v-if="passwordsMismatch"
-              :show-label="false"
-            >
-              <n-alert
-                type="warning"
-                title="Проверить пароль"
-                closable
-              >
-                Пароли не совпадают
-              </n-alert>
-            </n-form-item>
+          <UAlert
+            v-if="passwordsMismatch"
+            color="warning"
+            variant="subtle"
+            title="Проверьте пароль"
+            description="Пароли не совпадают."
+          />
 
-            <n-form-item
-              v-if="errorMessage"
-              :show-label="false"
-            >
-              <n-alert
-                type="error"
-                closable
-                @close="errorMessage = ''"
-              >
-                {{ errorMessage }}
-              </n-alert>
-            </n-form-item>
+          <UAlert
+            v-if="errorMessage"
+            color="error"
+            variant="subtle"
+            title="Ошибка"
+            :description="errorMessage"
+          />
 
-            <n-form-item
-              :show-label="false"
-              :style="buttonContainerStyle"
+          <div class="space-y-3 pt-2">
+            <UButton
+              v-if="isOttMode && !tokenRequested"
+              block
+              size="md"
+              :loading="authStore.isLoading"
+              :disabled="!email || authStore.isLoading"
+              @click="handleRequestToken"
             >
-              <n-space
-                vertical
-                :size="16"
-              >
-                <n-button
-                  v-if="isOttMode && !tokenRequested"
-                  type="primary"
-                  size="large"
-                  :block="true"
-                  :loading="authStore.isLoading"
-                  :disabled="!email || authStore.isLoading"
-                  @click="handleRequestToken"
-                >
-                  Отправить код
-                </n-button>
-                <n-button
-                  v-else
-                  type="primary"
-                  size="large"
-                  :block="true"
-                  attr-type="submit"
-                  :loading="authStore.isLoading"
-                  :disabled="isSubmitDisabled"
-                >
-                  {{
-                    isRegisterMode
-                      ? 'Зарегистрироваться'
-                      : isOttMode
-                        ? 'Войти'
-                        : 'Войти'
-                  }}
-                </n-button>
-              </n-space>
-            </n-form-item>
-          </n-space>
-        </n-form>
-      </n-card>
-    </n-layout-content>
-  </n-layout>
+              Отправить код
+            </UButton>
+            <UButton
+              v-else
+              block
+              size="md"
+              type="submit"
+              :loading="authStore.isLoading"
+              :disabled="isSubmitDisabled"
+            >
+              {{ isRegisterMode ? 'Зарегистрироваться' : 'Войти' }}
+            </UButton>
+          </div>
+        </UForm>
+      </div>
+    </UCard>
+  </div>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: 'LoginScreen' });
-import {
-  NAlert,
-  NButton,
-  NCard,
-  NForm,
-  NFormItem,
-  NInput,
-  NLayout,
-  NLayoutContent,
-  NSpace,
-} from 'naive-ui';
+
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import type { CSSProperties } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -178,6 +140,7 @@ const errorMessage = ref('');
 const confirmPassword = ref('');
 const ottToken = ref('');
 const tokenRequested = ref(false);
+
 type AuthMode = 'login' | 'register' | 'ott';
 const authMode = ref<AuthMode>('login');
 
@@ -272,31 +235,6 @@ onMounted(() => {
   tokenRequested.value = false;
   authMode.value = 'ott';
 });
-
-const layoutStyle: CSSProperties = {
-  minHeight: '100vh',
-};
-
-const layoutContentStyle: CSSProperties = {
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '24px',
-  background: 'var(--n-body-color)',
-};
-
-const cardStyle: CSSProperties = {
-  maxWidth: '420px',
-  width: '100%',
-  margin: '0 auto',
-};
-
-const buttonContainerStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  marginTop: '16px',
-};
 </script>
 
 <style scoped></style>
