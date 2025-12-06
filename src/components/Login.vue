@@ -6,9 +6,6 @@
       <div class="space-y-6">
         <div class="text-center space-y-1">
           <h1 class="text-xl font-semibold">Вход в систему</h1>
-          <p class="text-sm text-muted">
-            Введите e-mail, чтобы получить одноразовый код входа
-          </p>
         </div>
 
         <UForm
@@ -17,8 +14,9 @@
           @submit.prevent="handleSubmit"
         >
           <UFormField
-            label="E-mail"
             name="email"
+            label="E-mail"
+            :error="emailError"
           >
             <UInput
               v-model="email"
@@ -101,7 +99,7 @@
               block
               size="md"
               :loading="authStore.isLoading"
-              :disabled="!email || authStore.isLoading"
+              :disabled="!email || !!emailError || authStore.isLoading"
               @click="handleRequestToken"
             >
               Отправить код
@@ -128,6 +126,7 @@ defineOptions({ name: 'LoginScreen' });
 
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { z } from 'zod';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -140,6 +139,12 @@ const errorMessage = ref('');
 const confirmPassword = ref('');
 const ottToken = ref('');
 const tokenRequested = ref(false);
+const emailError = ref('');
+
+const emailSchema = z
+  .string()
+  .min(1, 'Укажите e-mail')
+  .email('Введите корректный e-mail');
 
 type AuthMode = 'login' | 'register' | 'ott';
 const authMode = ref<AuthMode>('login');
@@ -160,7 +165,7 @@ const isSubmitDisabled = computed(() => {
   if (isOttMode.value) {
     return !tokenRequested.value || !ottToken.value;
   }
-  if (!email.value || !password.value) return true;
+  if (!email.value || !!emailError.value || !password.value) return true;
   if (isRegisterMode.value) {
     return !confirmPassword.value || passwordsMismatch.value;
   }
@@ -176,8 +181,36 @@ watch(authMode, (mode) => {
   }
 });
 
+watch(email, (value) => {
+  if (!value) {
+    emailError.value = '';
+    return;
+  }
+
+  const result = emailSchema.safeParse(value);
+  if (!result.success) {
+    emailError.value = result.error.issues[0]?.message ?? 'Некорректный e-mail';
+  } else {
+    emailError.value = '';
+  }
+});
+
+const validateEmail = () => {
+  const result = emailSchema.safeParse(email.value);
+  if (!result.success) {
+    emailError.value = result.error.issues[0]?.message ?? 'Некорректный e-mail';
+    return false;
+  }
+  emailError.value = '';
+  return true;
+};
+
 const handleRequestToken = async () => {
-  if (!email.value || authStore.isLoading) {
+  if (authStore.isLoading) {
+    return;
+  }
+
+  if (!validateEmail()) {
     return;
   }
 
@@ -193,6 +226,10 @@ const handleRequestToken = async () => {
 
 const handleSubmit = async () => {
   if (isSubmitDisabled.value) {
+    return;
+  }
+
+  if (!isOttMode.value && !validateEmail()) {
     return;
   }
 

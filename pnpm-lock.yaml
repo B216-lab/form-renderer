@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@nuxt/ui':
         specifier: ^4.2.1
-        version: 4.2.1(@babel/parser@7.28.4)(async-validator@4.2.5)(axios@1.12.2)(embla-carousel@8.6.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.93.0))(vue-router@4.6.3(vue@3.5.21(typescript@5.8.3)))(vue@3.5.21(typescript@5.8.3))
+        version: 4.2.1(@babel/parser@7.28.4)(async-validator@4.2.5)(axios@1.12.2)(embla-carousel@8.6.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.93.0))(vue-router@4.6.3(vue@3.5.21(typescript@5.8.3)))(vue@3.5.21(typescript@5.8.3))(zod@4.1.13)
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.93.0))
@@ -41,6 +41,9 @@ importers:
       vue-router:
         specifier: ^4.6.3
         version: 4.6.3(vue@3.5.21(typescript@5.8.3))
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
     devDependencies:
       '@eslint/js':
         specifier: ^9.37.0
@@ -2883,6 +2886,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod@4.1.13:
+    resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -3530,7 +3536,7 @@ snapshots:
       pkg-types: 2.3.0
       std-env: 3.10.0
 
-  '@nuxt/ui@4.2.1(@babel/parser@7.28.4)(async-validator@4.2.5)(axios@1.12.2)(embla-carousel@8.6.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.93.0))(vue-router@4.6.3(vue@3.5.21(typescript@5.8.3)))(vue@3.5.21(typescript@5.8.3))':
+  '@nuxt/ui@4.2.1(@babel/parser@7.28.4)(async-validator@4.2.5)(axios@1.12.2)(embla-carousel@8.6.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.93.0))(vue-router@4.6.3(vue@3.5.21(typescript@5.8.3)))(vue@3.5.21(typescript@5.8.3))(zod@4.1.13)':
     dependencies:
       '@iconify/vue': 5.0.0(vue@3.5.21(typescript@5.8.3))
       '@internationalized/date': 3.10.0
@@ -3580,6 +3586,7 @@ snapshots:
       vue-component-type-helpers: 3.1.6
     optionalDependencies:
       vue-router: 4.6.3(vue@3.5.21(typescript@5.8.3))
+      zod: 4.1.13
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -5745,3 +5752,5 @@ snapshots:
   yallist@3.1.1: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@4.1.13: {}
