@@ -36,11 +36,11 @@ async function ensureCsrfTokenLoaded(): Promise<void> {
       error instanceof TypeError
         ? 'Не удалось получить CSRF токен. Проверьте, что сервер запущен.'
         : 'Ошибка сети при получении CSRF токена.';
-    throw new ApiNetworkError(errorMessage, error);
+    throw new ApiInternalNetworkError(errorMessage, error);
   }
 
   if (!response.ok) {
-    throw new ApiHttpError(
+    throw new ApiInternalHttpError(
       `Не удалось получить CSRF токен: ${response.status} ${response.statusText}`,
       response.status,
       response.statusText
@@ -75,6 +75,16 @@ export class ApiNetworkError extends Error {
 }
 
 /**
+ * Внутренняя сетевая ошибка API
+ */
+export class ApiInternalNetworkError extends ApiNetworkError {
+  constructor(message: string, originalError?: unknown) {
+    super(message, originalError);
+    this.name = 'ApiInternalNetworkError';
+  }
+}
+
+/**
  * Класс ошибки для HTTP ошибок API.
  */
 export class ApiHttpError extends Error {
@@ -85,6 +95,16 @@ export class ApiHttpError extends Error {
   ) {
     super(message);
     this.name = 'ApiHttpError';
+  }
+}
+
+/**
+ * Внутренняя HTTP-ошибка API
+ */
+export class ApiInternalHttpError extends ApiHttpError {
+  constructor(message: string, status: number, statusText: string) {
+    super(message, status, statusText);
+    this.name = 'ApiInternalHttpError';
   }
 }
 

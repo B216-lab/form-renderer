@@ -1,459 +1,465 @@
 <template>
-  <div class="day-movements">
-    <div class="day-movements__card">
-      <SuccessScreen v-if="isSubmitted" />
-      <Vueform
-        v-else
-        ref="form$"
-        v-model="data"
-        sync
-        size="md"
-        :display-errors="false"
-        add-class="vf-create-account"
-        endpoint="http://localhost:8081/api/v1/public/forms/movements"
-        method="post"
-        @success="handleSuccess"
-      >
-        <template #empty>
-          <FormSteps>
-            <FormStep
-              name="page0"
-              :elements="[
-                'birthday',
-                'gender',
-                'socialStatus',
-                'coordinatesAddress',
-                'transportationCostsContainer',
-                'financialSituationContainer',
-              ]"
-              label="Общая информация"
-              :labels="{
-                next: 'Далее',
-              }"
-              :buttons="{
-                previous: false,
-              }"
-            />
-            <FormStep
-              name="page1"
-              :elements="['html', 'movementsDate', 'movements']"
-              label="Передвижения"
-              :labels="{
-                previous: 'Назад',
-                next: 'Завершить',
-              }"
-            />
-          </FormSteps>
-          <FormElements>
-            <DateElement
-              name="birthday"
-              label="День рождения"
-              :floating="false"
-              min="1956-12-01"
-              max="2018-12-01"
-              :rules="['required']"
-              :columns="{
-                container: 6,
-              }"
-            />
-            <SelectElement
-              name="gender"
-              :items="enumToOptions(Gender)"
-              :native="false"
-              :columns="{
-                container: 6,
-              }"
-              label="Пол"
-              :rules="['required']"
-            />
-            <SelectElement
-              name="socialStatus"
-              :native="false"
-              label="Социальный статус"
-              :caret="false"
-              :items="enumToOptions(SocialStatus)"
-              :rules="['required']"
-            />
-            <SelectElement
-              name="homeAddress"
-              :items="getAddressItems"
-              :resolve-on-load="false"
-              :delay="ADDRESS_DELAY"
-              label-prop="value"
-              :object="true"
-              allow-absent
-              :min-chars="DEFAULT_MIN_CHARS"
-              :search="true"
-              :native="false"
-              label="Адрес проживания"
-              :filter-results="false"
-              input-type="search"
-              autocomplete="off"
-              :description="ADDRESS_SUGGESTION_HINT"
-              :rules="['required', precise]"
-            />
-            <GroupElement
-              name="transportationCostsContainer"
-              label="Расходы на транспорт"
-            >
-              <TextElement
-                name="transportCostMin"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:20000', 'integer']"
-                autocomplete="off"
-                :floating="false"
-                label="Минимум, ₽/мес"
-                placeholder="0"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="0"
-              />
-              <TextElement
-                name="transportCostMax"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:20000', 'integer']"
-                autocomplete="off"
-                label="Максимум, ₽/мес"
-                :floating="false"
-                placeholder="3000"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="3000"
-              />
-            </GroupElement>
-            <GroupElement
-              name="financialSituationContainer"
-              label="Ежемесячный доход"
-            >
-              <TextElement
-                name="incomeMin"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:250000', 'integer']"
-                autocomplete="off"
-                label="Минимум, ₽/мес"
-                :floating="false"
-                placeholder="0"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="0"
-                description="Минимум. Установить, если доход фиксированный."
-              />
-              <TextElement
-                name="incomeMax"
-                input-type="number"
-                :rules="['required', 'min:0', 'max:250000', 'integer']"
-                autocomplete="off"
-                label="Максимум, ₽/мес"
-                :floating="false"
-                placeholder="50000"
-                :force-numbers="true"
-                :columns="{
-                  container: 6,
-                }"
-                default="50000"
-                description="Максимум. Установить как минимум если доход фиксированный."
-              />
-            </GroupElement>
-            <StaticElement
-              name="html"
-              content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
-              :expressions="true"
-              add-class="info-callout"
-            />
-            <DateElement
-              name="movementsDate"
-              label="Дата передвижений"
-              :rules="['required']"
-              field-name="date_id"
-              description="Нужно будет описать передвижения за этот день"
-            />
-            <ListElement
-              name="movements"
-              :min="1"
-              :max="15"
-              add-text="Добавить передвижение"
-              :rules="['required', 'min:1', 'max:15']"
-            >
-              <template #default="{ index }">
-                <ObjectElement :name="index">
-                  <GroupElement name="container">
-                    <RadiogroupElement
-                      name="movementType"
-                      view="tabs"
-                      default="ON_FOOT"
-                      :items="enumToOptions(TypeMovement)"
-                      label="Способ передвижения"
-                      :rules="['required']"
-                    />
-                    <MultiselectElement
-                      name="transport"
-                      :close-on-select="false"
-                      :items="enumToOptions(Transport)"
-                      :search="true"
-                      :native="false"
-                      label="Тип транспорта"
-                      input-type="search"
-                      autocomplete="off"
-                      :rules="['required', 'min:1']"
-                      :conditions="[
-                        [
-                          'movements.*.container.typeMovement',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <TextElement
-                      name="numberPeopleInCar"
-                      input-type="number"
-                      :rules="[
-                        'nullable',
-                        'required',
-                        'min:1',
-                        'max:15',
-                        'integer',
-                      ]"
-                      autocomplete="off"
-                      label="Количество людей в автомобиле"
-                      :force-numbers="true"
-                      :conditions="[
-                        [
-                          'movements.*.container.transport',
-                          'in',
-                          ['CAR_SHARING'],
-                        ],
-                      ]"
-                      default="1"
-                    />
-                    <TextElement
-                      name="walkToStartMinutes"
-                      input-type="number"
-                      :rules="[
-                        'nullable',
-                        'required',
-                        'min:5',
-                        'max:180',
-                        'integer',
-                      ]"
-                      autocomplete="off"
-                      label="Пешком до начальной остановки / парковки, мин"
-                      :force-numbers="true"
-                      :conditions="[
-                        [
-                          'movements.*.container.movementType',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <TextElement
-                      name="waitAtStartMinutes"
-                      input-type="number"
-                      :rules="[
-                        'nullable',
-                        'required',
-                        'min:5',
-                        'max:180',
-                        'integer',
-                      ]"
-                      autocomplete="off"
-                      label="Ожидание на начальной остановке, мин"
-                      :force-numbers="true"
-                      :conditions="[
-                        [
-                          'movements.*.container.movementType',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <TextElement
-                      name="numberOfTransfers"
-                      input-type="number"
-                      :rules="['required', 'min:0', 'max:15', 'integer']"
-                      autocomplete="off"
-                      label="Количество пересадок"
-                      :force-numbers="true"
-                      default="0"
-                      :conditions="[
-                        [
-                          'movements.*.container.movementType',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <TextElement
-                      name="waitBetweenTransfersMinutes"
-                      input-type="number"
-                      :rules="['required', 'min:0', 'max:180', 'integer']"
-                      autocomplete="off"
-                      label="Ожидание при пересадках, мин"
-                      default="0"
-                      :floating="false"
-                    />
-                    <DateElement
-                      name="departureTime"
-                      label="Время отправления"
-                      :time="true"
-                      :date="false"
-                      :columns="{
-                        container: 6,
-                      }"
-                      :rules="['required']"
-                    />
-                    <SelectElement
-                      name="departurePlace"
-                      :items="enumToOptions(Place)"
-                      :search="true"
-                      :native="false"
-                      label="Пункт отправления"
-                      input-type="search"
-                      autocomplete="off"
-                      :columns="{
-                        container: 6,
-                      }"
-                      :rules="['required']"
-                    />
-                    <SelectElement
-                      name="departureAddress"
-                      :items="getAddressItems"
-                      :delay="ADDRESS_DELAY"
-                      :search="true"
-                      label-prop="value"
-                      :object="true"
-                      allow-absent
-                      :resolve-on-load="false"
-                      :native="false"
-                      :min-chars="DEFAULT_MIN_CHARS"
-                      :filter-results="false"
-                      label="Адрес отправления"
-                      input-type="search"
-                      autocomplete="off"
-                      :description="ADDRESS_SUGGESTION_HINT"
-                      :rules="[
-                        'required',
-                        precise,
-                        'different:movements.*.container.departurePlace',
-                      ]"
-                      :conditions="[
-                        [
-                          'movements.*.container.departurePlace',
-                          'not_in',
-                          ['HOME_RESIDENCE'],
-                        ],
-                      ]"
-                    />
-                    <StaticElement
-                      name="divider_1"
-                      tag="hr"
-                    />
-                    <DateElement
-                      name="arrivalTime"
-                      label="Время прибытия"
-                      :time="true"
-                      :date="false"
-                      :columns="{
-                        container: 6,
-                      }"
-                      :rules="['required']"
-                    />
-                    <SelectElement
-                      name="arrivalPlace"
-                      :items="enumToOptions(Place)"
-                      :search="true"
-                      :native="false"
-                      label="Пункт прибытия"
-                      input-type="search"
-                      autocomplete="off"
-                      :columns="{
-                        container: 6,
-                      }"
-                      :rules="['required']"
-                    />
-                    <TextElement
-                      name="walkFromFinishMinutes"
-                      input-type="number"
-                      :rules="['required', 'min:0', 'max:180', 'integer']"
-                      autocomplete="off"
-                      label="Пешком от конечной остановки / парковки до места прибытия, мин"
-                      :conditions="[
-                        [
-                          'movements.*.container.movementType',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <TextElement
-                      name="tripCost"
-                      input-type="number"
-                      :rules="['nullable', 'min:0', 'max:25000', 'integer']"
-                      autocomplete="off"
-                      label="Стоимость поездки / парковки, ₽"
-                      :conditions="[
-                        [
-                          'movements.*.container.movementType',
-                          'in',
-                          ['TRANSPORT'],
-                        ],
-                      ]"
-                    />
-                    <SelectElement
-                      name="arrivalAddress"
-                      :items="getAddressItems"
-                      :delay="ADDRESS_DELAY"
-                      :search="true"
-                      label-prop="value"
-                      :object="true"
-                      allow-absent
-                      :min-chars="DEFAULT_MIN_CHARS"
-                      :resolve-on-load="false"
-                      :native="false"
-                      :filter-results="false"
-                      input-type="search"
-                      autocomplete="off"
-                      label="Адрес прибытия"
-                      :description="ADDRESS_SUGGESTION_HINT"
-                      :rules="[
-                        'required',
-                        precise,
-                        'different:movements.*.container.departureAddress',
-                      ]"
-                      :conditions="[
-                        [
-                          'movements.*.container.arrivalPlace',
-                          'not_in',
-                          ['HOME_RESIDENCE'],
-                        ],
-                      ]"
-                    />
-                    <StaticElement
-                      name="divider_2"
-                      tag="hr"
-                    />
-                    <TextareaElement
-                      name="textarea"
-                      label="Комментарий"
-                      description="Пожелания по улучшению транспортной инфраструктуры"
-                    />
-                  </GroupElement>
-                </ObjectElement>
-              </template>
-            </ListElement>
-          </FormElements>
+  <n-layout
+    :style="layoutStyle"
+    :content-style="layoutContentStyle"
+  >
+    <n-layout-content>
+      <div class="day-movements">
+        <div class="day-movements__card">
+          <SuccessScreen v-if="isSubmitted" />
+          <Vueform
+            v-else
+            ref="form$"
+            v-model="data"
+            sync
+            size="md"
+            :display-errors="false"
+            add-class="vf-create-account"
+            endpoint="http://localhost:8081/api/v1/public/forms/movements"
+            method="post"
+            @success="handleSuccess"
+          >
+            <template #empty>
+              <FormSteps>
+                <FormStep
+                  name="page0"
+                  :elements="[
+                    'birthday',
+                    'gender',
+                    'socialStatus',
+                    'coordinatesAddress',
+                    'transportationCostsContainer',
+                    'financialSituationContainer',
+                  ]"
+                  label="Общая информация"
+                  :labels="{
+                    next: 'Далее',
+                  }"
+                  :buttons="{
+                    previous: false,
+                  }"
+                />
+                <FormStep
+                  name="page1"
+                  :elements="['html', 'movementsDate', 'movements']"
+                  label="Передвижения"
+                  :labels="{
+                    previous: 'Назад',
+                    next: 'Завершить',
+                  }"
+                />
+              </FormSteps>
+              <FormElements>
+                <DateElement
+                  name="birthday"
+                  label="День рождения"
+                  :floating="false"
+                  min="1956-12-01"
+                  max="2018-12-01"
+                  :rules="['required']"
+                  :columns="{
+                    container: 6,
+                  }"
+                />
+                <SelectElement
+                  name="gender"
+                  :items="enumToOptions(Gender)"
+                  :native="false"
+                  :columns="{
+                    container: 6,
+                  }"
+                  label="Пол"
+                  :rules="['required']"
+                />
+                <SelectElement
+                  name="socialStatus"
+                  :native="false"
+                  label="Социальный статус"
+                  :items="enumToOptions(SocialStatus)"
+                  :rules="['required']"
+                />
+                <SelectElement
+                  name="homeAddress"
+                  :items="getAddressItems"
+                  :resolve-on-load="false"
+                  :delay="ADDRESS_DELAY"
+                  label-prop="value"
+                  :object="true"
+                  allow-absent
+                  :min-chars="DEFAULT_MIN_CHARS"
+                  :search="true"
+                  :native="false"
+                  label="Адрес проживания"
+                  :filter-results="false"
+                  input-type="search"
+                  autocomplete="off"
+                  :description="ADDRESS_SUGGESTION_HINT"
+                  :rules="['required', precise]"
+                />
+                <GroupElement
+                  name="transportationCostsContainer"
+                  label="Расходы на транспорт"
+                >
+                  <TextElement
+                    name="transportCostMin"
+                    input-type="number"
+                    :rules="['required', 'min:0', 'max:20000', 'integer']"
+                    autocomplete="off"
+                    :floating="false"
+                    label="Минимум, ₽/мес"
+                    placeholder="0"
+                    :force-numbers="true"
+                    :columns="{
+                      container: 6,
+                    }"
+                    default="0"
+                  />
+                  <TextElement
+                    name="transportCostMax"
+                    input-type="number"
+                    :rules="['required', 'min:0', 'max:20000', 'integer']"
+                    autocomplete="off"
+                    label="Максимум, ₽/мес"
+                    :floating="false"
+                    placeholder="3000"
+                    :force-numbers="true"
+                    :columns="{
+                      container: 6,
+                    }"
+                    default="3000"
+                  />
+                </GroupElement>
+                <GroupElement
+                  name="financialSituationContainer"
+                  label="Ежемесячный доход"
+                >
+                  <TextElement
+                    name="incomeMin"
+                    input-type="number"
+                    :rules="['required', 'min:0', 'max:250000', 'integer']"
+                    autocomplete="off"
+                    label="Минимум, ₽/мес"
+                    :floating="false"
+                    placeholder="0"
+                    :force-numbers="true"
+                    :columns="{
+                      container: 6,
+                    }"
+                    default="0"
+                    description="Минимум. Установить, если доход фиксированный."
+                  />
+                  <TextElement
+                    name="incomeMax"
+                    input-type="number"
+                    :rules="['required', 'min:0', 'max:250000', 'integer']"
+                    autocomplete="off"
+                    label="Максимум, ₽/мес"
+                    :floating="false"
+                    placeholder="50000"
+                    :force-numbers="true"
+                    :columns="{
+                      container: 6,
+                    }"
+                    default="50000"
+                    description="Максимум. Установить как минимум если доход фиксированный."
+                  />
+                </GroupElement>
+                <StaticElement
+                  name="html"
+                  content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
+                  :expressions="true"
+                  add-class="info-callout"
+                />
+                <DateElement
+                  name="movementsDate"
+                  label="Дата передвижений"
+                  :rules="['required']"
+                  field-name="date_id"
+                  description="Нужно будет описать передвижения за этот день"
+                />
+                <ListElement
+                  name="movements"
+                  :min="1"
+                  :max="15"
+                  add-text="Добавить передвижение"
+                  :rules="['required', 'min:1', 'max:15']"
+                >
+                  <template #default="{ index }">
+                    <ObjectElement :name="index">
+                      <GroupElement name="container">
+                        <RadiogroupElement
+                          name="movementType"
+                          view="tabs"
+                          default="ON_FOOT"
+                          :items="enumToOptions(TypeMovement)"
+                          label="Способ передвижения"
+                          :rules="['required']"
+                        />
+                        <MultiselectElement
+                          name="transport"
+                          :close-on-select="false"
+                          :items="enumToOptions(Transport)"
+                          :search="true"
+                          :native="false"
+                          label="Тип транспорта"
+                          input-type="search"
+                          autocomplete="off"
+                          :rules="['required', 'min:1']"
+                          :conditions="[
+                            [
+                              'movements.*.container.typeMovement',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <TextElement
+                          name="numberPeopleInCar"
+                          input-type="number"
+                          :rules="[
+                            'nullable',
+                            'required',
+                            'min:1',
+                            'max:15',
+                            'integer',
+                          ]"
+                          autocomplete="off"
+                          label="Количество людей в автомобиле"
+                          :force-numbers="true"
+                          :conditions="[
+                            [
+                              'movements.*.container.transport',
+                              'in',
+                              ['CAR_SHARING'],
+                            ],
+                          ]"
+                          default="1"
+                        />
+                        <TextElement
+                          name="walkToStartMinutes"
+                          input-type="number"
+                          :rules="[
+                            'nullable',
+                            'required',
+                            'min:5',
+                            'max:180',
+                            'integer',
+                          ]"
+                          autocomplete="off"
+                          label="Пешком до начальной остановки / парковки, мин"
+                          :force-numbers="true"
+                          :conditions="[
+                            [
+                              'movements.*.container.movementType',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <TextElement
+                          name="waitAtStartMinutes"
+                          input-type="number"
+                          :rules="[
+                            'nullable',
+                            'required',
+                            'min:5',
+                            'max:180',
+                            'integer',
+                          ]"
+                          autocomplete="off"
+                          label="Ожидание на начальной остановке, мин"
+                          :force-numbers="true"
+                          :conditions="[
+                            [
+                              'movements.*.container.movementType',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <TextElement
+                          name="numberOfTransfers"
+                          input-type="number"
+                          :rules="['required', 'min:0', 'max:15', 'integer']"
+                          autocomplete="off"
+                          label="Количество пересадок"
+                          :force-numbers="true"
+                          default="0"
+                          :conditions="[
+                            [
+                              'movements.*.container.movementType',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <TextElement
+                          name="waitBetweenTransfersMinutes"
+                          input-type="number"
+                          :rules="['required', 'min:0', 'max:180', 'integer']"
+                          autocomplete="off"
+                          label="Ожидание при пересадках, мин"
+                          default="0"
+                          :floating="false"
+                        />
+                        <DateElement
+                          name="departureTime"
+                          label="Время отправления"
+                          :time="true"
+                          :date="false"
+                          :columns="{
+                            container: 6,
+                          }"
+                          :rules="['required']"
+                        />
+                        <SelectElement
+                          name="departurePlace"
+                          :items="enumToOptions(Place)"
+                          :search="true"
+                          :native="false"
+                          label="Пункт отправления"
+                          input-type="search"
+                          autocomplete="off"
+                          :columns="{
+                            container: 6,
+                          }"
+                          :rules="['required']"
+                        />
+                        <SelectElement
+                          name="departureAddress"
+                          :items="getAddressItems"
+                          :delay="ADDRESS_DELAY"
+                          :search="true"
+                          label-prop="value"
+                          :object="true"
+                          allow-absent
+                          :resolve-on-load="false"
+                          :native="false"
+                          :min-chars="DEFAULT_MIN_CHARS"
+                          :filter-results="false"
+                          label="Адрес отправления"
+                          input-type="search"
+                          autocomplete="off"
+                          :description="ADDRESS_SUGGESTION_HINT"
+                          :rules="[
+                            'required',
+                            precise,
+                            'different:movements.*.container.departurePlace',
+                          ]"
+                          :conditions="[
+                            [
+                              'movements.*.container.departurePlace',
+                              'not_in',
+                              ['HOME_RESIDENCE'],
+                            ],
+                          ]"
+                        />
+                        <StaticElement
+                          name="divider_1"
+                          tag="hr"
+                        />
+                        <DateElement
+                          name="arrivalTime"
+                          label="Время прибытия"
+                          :time="true"
+                          :date="false"
+                          :columns="{
+                            container: 6,
+                          }"
+                          :rules="['required']"
+                        />
+                        <SelectElement
+                          name="arrivalPlace"
+                          :items="enumToOptions(Place)"
+                          :search="true"
+                          :native="false"
+                          label="Пункт прибытия"
+                          input-type="search"
+                          autocomplete="off"
+                          :columns="{
+                            container: 6,
+                          }"
+                          :rules="['required']"
+                        />
+                        <TextElement
+                          name="walkFromFinishMinutes"
+                          input-type="number"
+                          :rules="['required', 'min:0', 'max:180', 'integer']"
+                          autocomplete="off"
+                          label="Пешком от конечной остановки / парковки до места прибытия, мин"
+                          :conditions="[
+                            [
+                              'movements.*.container.movementType',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <TextElement
+                          name="tripCost"
+                          input-type="number"
+                          :rules="['nullable', 'min:0', 'max:25000', 'integer']"
+                          autocomplete="off"
+                          label="Стоимость поездки / парковки, ₽"
+                          :conditions="[
+                            [
+                              'movements.*.container.movementType',
+                              'in',
+                              ['TRANSPORT'],
+                            ],
+                          ]"
+                        />
+                        <SelectElement
+                          name="arrivalAddress"
+                          :items="getAddressItems"
+                          :delay="ADDRESS_DELAY"
+                          :search="true"
+                          label-prop="value"
+                          :object="true"
+                          allow-absent
+                          :min-chars="DEFAULT_MIN_CHARS"
+                          :resolve-on-load="false"
+                          :native="false"
+                          :filter-results="false"
+                          input-type="search"
+                          autocomplete="off"
+                          label="Адрес прибытия"
+                          :description="ADDRESS_SUGGESTION_HINT"
+                          :rules="[
+                            'required',
+                            precise,
+                            'different:movements.*.container.departureAddress',
+                          ]"
+                          :conditions="[
+                            [
+                              'movements.*.container.arrivalPlace',
+                              'not_in',
+                              ['HOME_RESIDENCE'],
+                            ],
+                          ]"
+                        />
+                        <StaticElement
+                          name="divider_2"
+                          tag="hr"
+                        />
+                        <TextareaElement
+                          name="textarea"
+                          label="Комментарий"
+                          description="Пожелания по улучшению транспортной инфраструктуры"
+                        />
+                      </GroupElement>
+                    </ObjectElement>
+                  </template>
+                </ListElement>
+              </FormElements>
 
-          <FormStepsControls />
-        </template>
-      </Vueform>
-    </div>
-  </div>
+              <FormStepsControls />
+            </template>
+          </Vueform>
+        </div>
+      </div>
+    </n-layout-content>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
@@ -468,6 +474,7 @@ import type { DaDataAddressSuggestion } from 'react-dadata';
 import SuccessScreen from '@/components/SuccessScreen.vue';
 import { apiFetch, ApiHttpError, ApiNetworkError } from '@/api';
 
+import { NLayout, NLayoutContent } from 'naive-ui';
 const precise = class extends Validator {
   check(suggestion: DaDataAddressSuggestion | null) {
     const address = suggestion?.data;
@@ -484,6 +491,19 @@ const precise = class extends Validator {
   get msg() {
     return 'Адрес должен содержать номер дома';
   }
+};
+
+const layoutStyle: CSSProperties = {
+  minHeight: '100vh',
+};
+
+const layoutContentStyle: CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: '24px',
+  background: 'var(--n-body-color)',
 };
 
 const store = useFormsStore();
