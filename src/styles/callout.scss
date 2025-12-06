@@ -1,10 +1,8 @@
 .info-callout {
-  background: var(--vf-color-bg-secondary, #f1f5f9);
   border-left: 4px solid var(--vf-color-primary, #3b82f6);
   padding: 1.25rem 1.5rem;
   margin: 1.5rem 0;
   border-radius: 6px;
-  color: var(--vf-color-text, #0f172a);
   line-height: 1.6;
   font-size: 1rem;
 }
@@ -19,7 +17,6 @@
 
 .info-callout p {
   margin: 0;
-  color: var(--vf-color-text, #0f172a);
 }
 
 .info-callout a {
@@ -33,17 +30,7 @@
 
 @media (prefers-color-scheme: dark) {
   .info-callout {
-    background: var(--vf-color-bg-secondary, #111827);
     border-color: var(--vf-color-primary, #60a5fa);
-    color: var(--vf-color-text, #f8fafc);
-  }
-
-  .info-callout__title {
-    color: var(--vf-color-primary, #60a5fa);
-  }
-
-  .info-callout p {
-    color: var(--vf-color-text, #f8fafc);
   }
 }
 

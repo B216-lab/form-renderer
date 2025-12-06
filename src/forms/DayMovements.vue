@@ -165,9 +165,9 @@
               </GroupElement>
               <StaticElement
                 name="html"
-                content="<strong class='info-callout__title'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
+                content="<strong class='block text-lg font-semibold mb-2 text-blue-500 dark:text-blue-400'>Важно</strong><p>Необходимо внести данные о всех передвижениях за выбранный день {movementsDate} и обязательно учитывать передвижения в пешей доступности. Например, из дома на работу → с работы в магазин → из магазина домой → снова из дома в детский сад и т.д.</p>"
                 :expressions="true"
-                add-class="info-callout"
+                add-class="border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 py-5 px-6 my-6 rounded-md leading-relaxed text-base"
               />
               <DateElement
                 name="movementsDate"
@@ -681,5 +681,4 @@ const handleSuccess = () => {
 
 <style lang="scss">
 @import '@vueform/vueform/themes/vueform/scss/index.scss';
-@import '@/styles/callout.scss';
 </style>

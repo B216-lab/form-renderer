@@ -4,10 +4,6 @@
   >
     <UCard class="w-full max-w-md">
       <div class="space-y-6">
-        <div class="text-center space-y-1">
-          <h1 class="text-xl font-semibold">Вход в систему</h1>
-        </div>
-
         <UForm
           as="form"
           class="space-y-4"
@@ -15,15 +11,17 @@
         >
           <UFormField
             name="email"
-            label="E-mail"
             :error="emailError"
           >
             <UInput
+              ref="emailInputRef"
               v-model="email"
               type="email"
+              trailing-icon="i-lucide-at-sign"
               autocomplete="email"
               placeholder="user@example.com"
               :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
+              class="w-full"
             />
           </UFormField>
 
@@ -38,6 +36,7 @@
               autocomplete="current-password"
               placeholder="Введите пароль"
               :disabled="authStore.isLoading"
+              class="w-full"
             />
           </UFormField>
 
@@ -52,6 +51,7 @@
               autocomplete="new-password"
               placeholder="Повторите пароль"
               :disabled="authStore.isLoading"
+              class="w-full"
             />
           </UFormField>
 
@@ -65,7 +65,7 @@
               type="password"
               placeholder="Вставьте или введите код"
               :disabled="authStore.isLoading"
-              class="font-mono text-xs"
+              class="w-full font-mono text-xs"
             />
           </UFormField>
 
@@ -98,8 +98,9 @@
               v-if="isOttMode && !tokenRequested"
               block
               size="md"
+              type="button"
               :loading="authStore.isLoading"
-              :disabled="!email || !!emailError || authStore.isLoading"
+              :disabled="!email || authStore.isLoading"
               @click="handleRequestToken"
             >
               Отправить код
@@ -124,11 +125,21 @@
 <script setup lang="ts">
 defineOptions({ name: 'LoginScreen' });
 
-import { ref, onMounted, computed, watch } from 'vue';
+import {
+  ref,
+  onMounted,
+  computed,
+  watch,
+  nextTick,
+  type ComponentPublicInstance,
+} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { z } from 'zod';
+import { ru } from 'zod/locales';
+
 import { useAuthStore } from '../stores/authStore';
 
+z.config(ru());
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
@@ -140,6 +151,7 @@ const confirmPassword = ref('');
 const ottToken = ref('');
 const tokenRequested = ref(false);
 const emailError = ref('');
+const emailInputRef = ref<ComponentPublicInstance | null>(null);
 
 const emailSchema = z
   .string()
@@ -165,7 +177,7 @@ const isSubmitDisabled = computed(() => {
   if (isOttMode.value) {
     return !tokenRequested.value || !ottToken.value;
   }
-  if (!email.value || !!emailError.value || !password.value) return true;
+  if (!email.value || !password.value) return true;
   if (isRegisterMode.value) {
     return !confirmPassword.value || passwordsMismatch.value;
   }
@@ -176,22 +188,9 @@ watch(authMode, (mode) => {
   errorMessage.value = '';
   tokenRequested.value = false;
   ottToken.value = '';
+  emailError.value = '';
   if (mode === 'login') {
     confirmPassword.value = '';
-  }
-});
-
-watch(email, (value) => {
-  if (!value) {
-    emailError.value = '';
-    return;
-  }
-
-  const result = emailSchema.safeParse(value);
-  if (!result.success) {
-    emailError.value = result.error.issues[0]?.message ?? 'Некорректный e-mail';
-  } else {
-    emailError.value = '';
   }
 });
 
@@ -262,7 +261,7 @@ const handleSubmit = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   // Очистка полей при монтировании
   email.value = '';
   password.value = '';
@@ -270,7 +269,18 @@ onMounted(() => {
   confirmPassword.value = '';
   ottToken.value = '';
   tokenRequested.value = false;
+  emailError.value = '';
   authMode.value = 'ott';
+
+  // Фокусируем поле email после монтирования
+  await nextTick();
+  const inputElement =
+    emailInputRef.value?.$el?.querySelector('input') ||
+    emailInputRef.value?.$el?.querySelector('input[type="email"]') ||
+    document.querySelector('input[type="email"]');
+  if (inputElement instanceof HTMLInputElement) {
+    inputElement.focus();
+  }
 });
 </script>
 

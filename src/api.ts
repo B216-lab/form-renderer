@@ -17,6 +17,15 @@ let cachedCsrfToken: string | null = null;
 let cachedCsrfHeaderName: string = CSRF_HEADER_NAME;
 
 /**
+ * Сбрасывает кеш CSRF-токена, чтобы при следующем запросе
+ * он был заново получен с сервера.
+ */
+export function resetCsrfTokenCache(): void {
+  cachedCsrfToken = null;
+  cachedCsrfHeaderName = CSRF_HEADER_NAME;
+}
+
+/**
  * Загружает CSRF-токен с бэкенда и кеширует его в памяти.
  * Эндпоинт `/api/v1/auth/csrf` возвращает имя заголовка и значение токена.
  */

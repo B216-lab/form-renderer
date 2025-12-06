@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia';
-import { apiFetch, ApiNetworkError, ApiHttpError } from '../api';
+import {
+  apiFetch,
+  ApiNetworkError,
+  ApiHttpError,
+  resetCsrfTokenCache,
+} from '../api';
 import { handleApiError } from '../utils/errorHandler';
 
 interface UserInfo {
@@ -148,13 +153,16 @@ export const useAuthStore = defineStore('auth', {
     async logout(): Promise<void> {
       this.isLoading = true;
       try {
-        await apiFetch('/api/v1/auth/logout', {
+        // Используем стандартный Spring Security logout endpoint,
+        // который инвалидирует HTTP-сессию и очищает JSESSIONID.
+        await apiFetch('/logout', {
           method: 'POST',
         });
       } catch {
         // При выходе не показываем ошибки, даже если сервер недоступен
         // Пользователь все равно должен иметь возможность выйти локально
       } finally {
+        resetCsrfTokenCache();
         this.isAuthenticated = false;
         this.user = null;
         this.isLoading = false;
