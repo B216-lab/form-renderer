@@ -27,14 +27,14 @@
 
           <UFormField
             v-if="!isOttMode"
-            label="Пароль"
+            :label="t('auth.password')"
             name="password"
           >
             <UInput
               v-model="password"
               type="password"
               autocomplete="current-password"
-              placeholder="Введите пароль"
+              :placeholder="t('auth.passwordPlaceholder')"
               :disabled="authStore.isLoading"
               class="w-full"
             />
@@ -42,14 +42,14 @@
 
           <UFormField
             v-if="isRegisterMode"
-            label="Повторите пароль"
+            :label="t('auth.confirmPassword')"
             name="confirmPassword"
           >
             <UInput
               v-model="confirmPassword"
               type="password"
               autocomplete="new-password"
-              placeholder="Повторите пароль"
+              :placeholder="t('auth.confirmPasswordPlaceholder')"
               :disabled="authStore.isLoading"
               class="w-full"
             />
@@ -57,13 +57,13 @@
 
           <UFormField
             v-if="isOttMode && tokenRequested"
-            label="Код из письма"
+            :label="t('auth.ottLabel')"
             name="ottToken"
           >
             <UInput
               v-model="ottToken"
               type="password"
-              placeholder="Вставьте или введите код"
+              :placeholder="t('auth.ottPlaceholder')"
               :disabled="authStore.isLoading"
               class="w-full font-mono text-xs"
             />
@@ -73,25 +73,49 @@
             v-if="isOttMode && tokenRequested"
             color="success"
             variant="subtle"
-            title="Код отправлен"
-            :description="`Код отправлен на ${email || 'указанный e-mail'}. Проверьте почту и введите код.`"
+            :title="t('auth.ottSentTitle')"
+            :description="
+              t('auth.ottSentDescription', {
+                email: email || 'указанный e-mail',
+              })
+            "
           />
 
           <UAlert
             v-if="passwordsMismatch"
             color="warning"
             variant="subtle"
-            title="Проверьте пароль"
-            description="Пароли не совпадают."
+            :title="t('auth.passwordsMismatchTitle')"
+            :description="t('auth.passwordsMismatchDescription')"
           />
 
           <UAlert
             v-if="errorMessage"
             color="error"
             variant="subtle"
-            title="Ошибка"
+            :title="t('auth.errorTitle')"
             :description="errorMessage"
           />
+
+          <UFormField
+            name="consent"
+            :error="consentError"
+          >
+            <div class="flex items-start gap-2 text-xs text-gray-500">
+              <UCheckbox v-model="consentAccepted" />
+              <p>
+                {{ t('auth.consentLabel') }}
+                <a
+                  href="/consent"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline"
+                >
+                  {{ t('auth.consentLink') }}
+                </a>
+              </p>
+            </div>
+          </UFormField>
 
           <div class="space-y-3 pt-2">
             <UButton
@@ -103,7 +127,7 @@
               :disabled="!email || authStore.isLoading"
               @click="handleRequestToken"
             >
-              Отправить код
+              {{ t('auth.sendCode') }}
             </UButton>
             <UButton
               v-else
@@ -113,7 +137,7 @@
               :loading="authStore.isLoading"
               :disabled="isSubmitDisabled"
             >
-              {{ isRegisterMode ? 'Зарегистрироваться' : 'Войти' }}
+              {{ isRegisterMode ? t('auth.register') : t('auth.login') }}
             </UButton>
           </div>
         </UForm>
@@ -134,11 +158,13 @@ import {
   type ComponentPublicInstance,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { z } from 'zod';
 
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
@@ -150,6 +176,8 @@ const ottToken = ref('');
 const tokenRequested = ref(false);
 const emailError = ref('');
 const emailInputRef = ref<ComponentPublicInstance | null>(null);
+const consentAccepted = ref(false);
+const consentError = ref('');
 
 const emailSchema = z
   .string()
@@ -211,6 +239,10 @@ const handleRequestToken = async () => {
     return;
   }
 
+  if (!validateConsent()) {
+    return;
+  }
+
   errorMessage.value = '';
   try {
     await authStore.requestOneTimeToken(email.value);
@@ -223,6 +255,10 @@ const handleRequestToken = async () => {
 
 const handleSubmit = async () => {
   if (isSubmitDisabled.value) {
+    return;
+  }
+
+  if (!validateConsent()) {
     return;
   }
 
@@ -268,6 +304,7 @@ onMounted(async () => {
   ottToken.value = '';
   tokenRequested.value = false;
   emailError.value = '';
+  consentAccepted.value = false;
   authMode.value = 'ott';
 
   // Фокусируем поле email после монтирования
@@ -278,6 +315,21 @@ onMounted(async () => {
     document.querySelector('input[type="email"]');
   if (inputElement instanceof HTMLInputElement) {
     inputElement.focus();
+  }
+});
+
+const validateConsent = () => {
+  if (!consentAccepted.value) {
+    consentError.value = t('auth.consentError');
+    return false;
+  }
+  consentError.value = '';
+  return true;
+};
+
+watch(consentAccepted, (value) => {
+  if (value) {
+    consentError.value = '';
   }
 });
 </script>

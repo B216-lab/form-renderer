@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useHead } from '@unhead/vue';
+import * as uiLocales from '@nuxt/ui/locale';
+import type { AppLocale } from './i18n';
 import { useAuthStore } from './stores/authStore';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const { t, locale } = useI18n();
+const showCookieNotice = ref(false);
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
@@ -17,16 +23,71 @@ const handleLogout = async () => {
     await router.push({ name: 'login' });
   }
 };
+
+const availableLocales: { code: AppLocale; label: string }[] = [
+  { code: 'en', label: 'EN' },
+  { code: 'ru', label: 'RU' },
+];
+
+const changeLocale = (code: AppLocale) => {
+  locale.value = code;
+};
+
+const uiLocale = computed(() => {
+  const current = (locale.value as keyof typeof uiLocales) || 'en';
+  return uiLocales[current] ?? uiLocales.en;
+});
+
+useHead(() => ({
+  title: t('app.title'),
+  meta: [
+    {
+      name: 'description',
+      content: t('app.description'),
+    },
+  ],
+  htmlAttrs: {
+    lang: locale.value,
+  },
+}));
+
+onMounted(() => {
+  if (typeof window === 'undefined') return;
+
+  const STORAGE_KEY = 'cookie-notice-dismissed';
+  if (!window.localStorage.getItem(STORAGE_KEY)) {
+    showCookieNotice.value = true;
+  }
+});
+
+const dismissCookieNotice = () => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem('cookie-notice-dismissed', '1');
+  }
+  showCookieNotice.value = false;
+};
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="uiLocale">
     <UHeader
-      title="Б216 | Анкета"
+      :title="t('app.title')"
       to="http://al@b216.org/"
     >
       <template #right>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1">
+            <UButton
+              v-for="item in availableLocales"
+              :key="item.code"
+              size="xs"
+              :variant="locale === item.code ? 'solid' : 'ghost'"
+              color="neutral"
+              @click="changeLocale(item.code)"
+            >
+              {{ item.label }}
+            </UButton>
+          </div>
           <UColorModeButton />
           <UButton
             v-if="isAuthenticated"
@@ -35,7 +96,7 @@ const handleLogout = async () => {
             size="sm"
             @click="handleLogout"
           >
-            Выйти
+            {{ t('app.logout') }}
           </UButton>
         </div>
       </template>
@@ -43,6 +104,26 @@ const handleLogout = async () => {
     <UMain>
       <router-view />
     </UMain>
+    <UAlert
+      v-if="showCookieNotice"
+      class="fixed bottom-4 right-4 max-w-sm z-50"
+      color="neutral"
+      variant="solid"
+      icon="i-lucide-cookie"
+      :title="t('app.cookieTitle')"
+      :description="t('app.cookieDescription')"
+    >
+      <template #actions>
+        <UButton
+          color="neutral"
+          size="xs"
+          variant="ghost"
+          @click="dismissCookieNotice"
+        >
+          {{ t('app.cookieClose') }}
+        </UButton>
+      </template>
+    </UAlert>
   </UApp>
 </template>
 
