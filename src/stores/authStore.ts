@@ -228,6 +228,12 @@ export const useAuthStore = defineStore('auth', {
         };
       } catch (error) {
         if (error instanceof ApiNetworkError || error instanceof ApiHttpError) {
+          // Для 401 при входе по одноразовому коду показываем понятное сообщение,
+          // а не техническую ошибку "401 Unauthorized"
+          if (error instanceof ApiHttpError && error.status === 401) {
+            throw new Error('Неверный или истёкший одноразовый код');
+          }
+
           handleApiError(error);
           throw error;
         }

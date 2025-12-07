@@ -62,6 +62,7 @@
             <UInput
               v-model="ottToken"
               type="password"
+              trailing-icon="i-lucide-key"
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
               :disabled="authStore.isLoading"
               class="w-full font-mono text-xs"
@@ -139,6 +140,31 @@
               {{ isRegisterMode ? t('auth.register') : t('auth.login') }}
             </UButton>
           </div>
+
+          <div
+            v-if="isOttMode && tokenRequested"
+            class="flex items-center justify-between pt-1 text-xs text-gray-500"
+          >
+            <span v-if="!isOttExpired">
+              {{
+                t('auth.ottCountdown', {
+                  time: formattedOttTime,
+                })
+              }}
+            </span>
+            <template v-else>
+              <span>{{ t('auth.ottExpired') }}</span>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                :loading="authStore.isLoading"
+                @click="handleRequestToken"
+              >
+                {{ t('auth.sendAgain') }}
+              </UButton>
+            </template>
+          </div>
         </UForm>
       </div>
     </UCard>
@@ -151,6 +177,7 @@ defineOptions({ name: 'LoginScreen' });
 import {
   ref,
   onMounted,
+  onBeforeUnmount,
   computed,
   watch,
   nextTick,
@@ -167,12 +194,21 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
+const OTT_STORAGE_KEY = 'ott-session';
+
+type OttSession = {
+  email: string;
+  expiresAt: string;
+};
+
 const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
 const confirmPassword = ref('');
 const ottToken = ref('');
 const tokenRequested = ref(false);
+const ottExpiresAt = ref<Date | null>(null);
+const ottRemainingSeconds = ref(0);
 const emailError = ref('');
 const emailInputRef = ref<ComponentPublicInstance | null>(null);
 const consentAccepted = ref(false);
@@ -188,6 +224,19 @@ const authMode = ref<AuthMode>('login');
 
 const isRegisterMode = computed(() => authMode.value === 'register');
 const isOttMode = computed(() => authMode.value === 'ott');
+
+const isOttExpired = computed(
+  () => tokenRequested.value && ottRemainingSeconds.value <= 0
+);
+
+const formattedOttTime = computed(() => {
+  const total = ottRemainingSeconds.value;
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  const mm = minutes.toString().padStart(2, '0');
+  const ss = seconds.toString().padStart(2, '0');
+  return `${mm}:${ss}`;
+});
 
 const passwordsMismatch = computed(
   () =>
@@ -209,11 +258,83 @@ const isSubmitDisabled = computed(() => {
   return false;
 });
 
-watch(authMode, (mode) => {
+let ottIntervalId: number | null = null;
+
+const clearOttTimer = () => {
+  if (ottIntervalId !== null) {
+    window.clearInterval(ottIntervalId);
+    ottIntervalId = null;
+  }
+};
+
+const saveOttSession = (session: OttSession) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(OTT_STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // Игнорируем ошибки доступа к localStorage
+  }
+};
+
+const loadOttSession = (): OttSession | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(OTT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<OttSession>;
+    if (!parsed.email || !parsed.expiresAt) return null;
+    return { email: parsed.email, expiresAt: parsed.expiresAt };
+  } catch {
+    return null;
+  }
+};
+
+const clearOttSession = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(OTT_STORAGE_KEY);
+  } catch {
+    // Игнорируем ошибки доступа к localStorage
+  }
+};
+
+const startOttTimer = (expiresAtIso: string) => {
+  clearOttTimer();
+
+  const expiresAt = new Date(expiresAtIso);
+  ottExpiresAt.value = expiresAt;
+
+  const tick = () => {
+    const diffMs = expiresAt.getTime() - Date.now();
+    const seconds = Math.max(0, Math.floor(diffMs / 1000));
+    ottRemainingSeconds.value = seconds;
+    if (seconds <= 0) {
+      clearOttTimer();
+      clearOttSession();
+    }
+  };
+
+  tick();
+
+  if (expiresAt.getTime() > Date.now()) {
+    ottIntervalId = window.setInterval(tick, 1000);
+  }
+};
+
+watch(authMode, (mode, previous) => {
   errorMessage.value = '';
-  tokenRequested.value = false;
-  ottToken.value = '';
-  emailError.value = '';
+
+  // Очищаем состояние OTT только при выходе из режима 'ott',
+  // чтобы не сбрасывать восстановленный по refresh поток.
+  if (previous === 'ott' && mode !== 'ott') {
+    tokenRequested.value = false;
+    ottToken.value = '';
+    clearOttTimer();
+    ottRemainingSeconds.value = 0;
+    ottExpiresAt.value = null;
+    clearOttSession();
+  }
+
   if (mode === 'login') {
     confirmPassword.value = '';
   }
@@ -244,8 +365,21 @@ const handleRequestToken = async () => {
 
   errorMessage.value = '';
   try {
-    await authStore.requestOneTimeToken(email.value);
+    const result = await authStore.requestOneTimeToken(email.value);
     tokenRequested.value = true;
+    if (result?.expiresAt) {
+      startOttTimer(result.expiresAt);
+      saveOttSession({
+        email: email.value,
+        expiresAt: result.expiresAt,
+      });
+    } else {
+      // Если по какой-то причине время истечения не пришло, сбрасываем таймер
+      clearOttTimer();
+      ottRemainingSeconds.value = 0;
+      ottExpiresAt.value = null;
+      clearOttSession();
+    }
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Не удалось отправить код';
@@ -274,6 +408,7 @@ const handleSubmit = async () => {
   try {
     if (isOttMode.value) {
       await authStore.loginWithOneTimeToken(ottToken.value);
+      clearOttSession();
     } else if (isRegisterMode.value) {
       await authStore.register(email.value, password.value);
       await authStore.login(email.value, password.value);
@@ -295,7 +430,7 @@ const handleSubmit = async () => {
 };
 
 onMounted(async () => {
-  // Очистка полей при монтировании
+  // Базовая очистка полей при монтировании
   email.value = '';
   password.value = '';
   errorMessage.value = '';
@@ -304,7 +439,23 @@ onMounted(async () => {
   tokenRequested.value = false;
   emailError.value = '';
   consentAccepted.value = false;
-  authMode.value = 'ott';
+
+  // Попытка восстановить состояние OTT из localStorage
+  const storedSession = loadOttSession();
+  if (storedSession) {
+    const expiresAt = new Date(storedSession.expiresAt);
+    if (expiresAt.getTime() > Date.now()) {
+      email.value = storedSession.email;
+      authMode.value = 'ott';
+      tokenRequested.value = true;
+      startOttTimer(storedSession.expiresAt);
+    } else {
+      clearOttSession();
+      authMode.value = 'ott';
+    }
+  } else {
+    authMode.value = 'ott';
+  }
 
   // Фокусируем поле email после монтирования
   await nextTick();
@@ -330,6 +481,10 @@ watch(consentAccepted, (value) => {
   if (value) {
     consentError.value = '';
   }
+});
+
+onBeforeUnmount(() => {
+  clearOttTimer();
 });
 </script>
 
