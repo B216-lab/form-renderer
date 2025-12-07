@@ -4,6 +4,7 @@ import {
   type RouteLocationNormalized,
 } from 'vue-router';
 import Login from './components/Login.vue';
+import Consent from './components/Consent.vue';
 import DayMovements from './forms/DayMovements.vue';
 import { useAuthStore } from './stores/authStore';
 
@@ -19,6 +20,11 @@ const routes = [
     name: 'day-movements',
     component: DayMovements,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/consent',
+    name: 'consent',
+    component: Consent,
   },
   {
     path: '/:pathMatch(.*)*',

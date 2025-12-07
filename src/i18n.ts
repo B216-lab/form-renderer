@@ -57,6 +57,18 @@ export const messages = {
       consentError:
         'You must accept the personal data usage terms to continue.',
     },
+    consent: {
+      title: 'Personal data and cookies consent',
+      intro:
+        'This page explains how we use your email address and cookies when you use this questionnaire.',
+      emailTitle: 'Email address usage',
+      emailText:
+        'We use your email address to identify you, send one-time login codes, and communicate about access to this questionnaire. Your email will not be shared with third parties except as required by law.',
+      cookiesTitle: 'Cookies usage',
+      cookiesText:
+        'We use technical cookies to keep you signed in and to remember your basic preferences. These cookies are not used for advertising or tracking across other sites.',
+      back: 'Back to login',
+    },
   },
   ru: {
     app: {
@@ -88,6 +100,18 @@ export const messages = {
       consentLink: 'условиями использования персональных данных',
       consentError:
         'Вы должны принять условия использования персональных данных, чтобы продолжить.',
+    },
+    consent: {
+      title: 'Согласие на обработку персональных данных и использование cookie',
+      intro:
+        'На этой странице описано, как мы используем ваш e-mail адрес и файлы cookie при работе с этой анкетой.',
+      emailTitle: 'Использование e-mail адреса',
+      emailText:
+        'Мы используем ваш e-mail для идентификации, отправки одноразовых кодов входа и связи по вопросам доступа к анкете. Ваш e-mail не передаётся третьим лицам, за исключением случаев, предусмотренных законом.',
+      cookiesTitle: 'Использование файлов cookie',
+      cookiesText:
+        'Мы используем технические cookie, чтобы поддерживать вашу сессию и запоминать базовые настройки. Эти cookie не используются для рекламы или отслеживания на других сайтах.',
+      back: 'Назад ко входу',
     },
   },
 } satisfies Record<AppLocale, Record<string, unknown>>;
