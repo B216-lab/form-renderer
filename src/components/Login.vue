@@ -135,11 +135,9 @@ import {
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { z } from 'zod';
-import { ru } from 'zod/locales';
 
 import { useAuthStore } from '../stores/authStore';
 
-z.config(ru());
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
@@ -156,7 +154,7 @@ const emailInputRef = ref<ComponentPublicInstance | null>(null);
 const emailSchema = z
   .string()
   .min(1, 'Укажите e-mail')
-  .email('Введите корректный e-mail');
+  .pipe(z.preprocess((val: string) => val.trim(), z.email().toLowerCase()));
 
 type AuthMode = 'login' | 'register' | 'ott';
 const authMode = ref<AuthMode>('login');

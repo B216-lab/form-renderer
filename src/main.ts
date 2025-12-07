@@ -8,6 +8,8 @@ import { createPinia } from 'pinia';
 import router from './router';
 import { useAuthStore } from './stores/authStore';
 import ui from '@nuxt/ui/vue-plugin';
+import { z } from 'zod';
+import { ru } from 'zod/locales';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -18,6 +20,8 @@ app.use(router);
 app.use(ui);
 
 const authStore = useAuthStore();
+
+z.config(ru());
 
 authStore
   .checkAuth()
