@@ -14,7 +14,7 @@
           :add-class="'vf-create-account'"
           size="md"
           :display-errors="false"
-          endpoint="http://localhost:8081/api/v1/public/forms/movements"
+          :endpoint="FORM_ENDPOINT"
           method="post"
           @success="handleSuccess"
         >
@@ -491,6 +491,8 @@ const precise = class extends Validator {
 };
 
 const store = useFormsStore();
+
+const FORM_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL}/api/v1/public/forms/movements`;
 
 const data = computed({
   get: () => store.dayMovements,

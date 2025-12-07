@@ -1,4 +1,5 @@
 import ru from '@vueform/vueform/locales/ru';
+import en from '@vueform/vueform/locales/en';
 import theme from '@vueform/vueform/dist/vueform';
 import { defineConfig } from '@vueform/vueform';
 import '@vueform/vueform/dist/vueform.css';
@@ -12,7 +13,8 @@ axios.defaults.headers.post = {
 export default defineConfig({
   theme,
   axios,
-  locales: { ru },
+  locales: { ru, en },
   locale: 'ru',
+  env: import.meta.env.MODE,
   showRequired: ['floating'],
 });

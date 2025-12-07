@@ -17,12 +17,8 @@ const detectInitialLocale = (): AppLocale => {
     return stored;
   }
 
-  const browser = window.navigator.language?.toLowerCase() ?? 'en';
-  if (browser.startsWith('ru')) {
-    return 'ru';
-  }
-
-  return 'en';
+  // По умолчанию используем русский язык
+  return 'ru';
 };
 
 export const messages = {
@@ -123,6 +119,6 @@ export const createI18nInstance = () =>
   createI18n({
     legacy: false,
     locale: detectInitialLocale(),
-    fallbackLocale: 'en',
+    fallbackLocale: 'ru',
     messages,
   });

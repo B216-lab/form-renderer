@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@unhead/vue';
 import * as uiLocales from '@nuxt/ui/locale';
-import type { AppLocale } from './i18n';
 import { useAuthStore } from './stores/authStore';
 
 const authStore = useAuthStore();
@@ -22,15 +21,6 @@ const handleLogout = async () => {
   } finally {
     await router.push({ name: 'login' });
   }
-};
-
-const availableLocales: { code: AppLocale; label: string }[] = [
-  { code: 'en', label: 'EN' },
-  { code: 'ru', label: 'RU' },
-];
-
-const changeLocale = (code: AppLocale) => {
-  locale.value = code;
 };
 
 const uiLocale = computed(() => {
@@ -76,18 +66,6 @@ const dismissCookieNotice = () => {
     >
       <template #right>
         <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1">
-            <UButton
-              v-for="item in availableLocales"
-              :key="item.code"
-              size="xs"
-              :variant="locale === item.code ? 'solid' : 'ghost'"
-              color="neutral"
-              @click="changeLocale(item.code)"
-            >
-              {{ item.label }}
-            </UButton>
-          </div>
           <UColorModeButton />
           <UButton
             v-if="isAuthenticated"

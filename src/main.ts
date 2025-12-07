@@ -26,13 +26,17 @@ const head =
   unheadAny.createUnhead?.();
 
 app.use(pinia);
-app.use(Vueform, vueformConfig);
 app.use(router);
 app.use(ui);
 app.use(i18n);
 if (head) {
   app.use(head);
 }
+
+app.use(Vueform, {
+  ...vueformConfig,
+  locale: i18n.global.locale.value as AppLocale,
+});
 
 const configureZodLocale = (locale: AppLocale) => {
   if (locale === 'ru') {
