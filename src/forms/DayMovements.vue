@@ -1,12 +1,9 @@
 <template>
-  <UContainer>
-    <SuccessScreen v-if="isSubmitted" />
+  <UPageBody>
+    <UContainer>
+      <SuccessScreen v-if="isSubmitted" />
 
-    <div
-      class="mt-5"
-      v-else
-    >
-      <UCard>
+      <UCard v-else>
         <Vueform
           ref="form$"
           v-model="data"
@@ -23,6 +20,7 @@
               <FormStep
                 name="page0"
                 :elements="[
+                  'homeAddress',
                   'birthday',
                   'gender',
                   'socialStatus',
@@ -55,6 +53,7 @@
                 :floating="false"
                 min="1956-12-01"
                 max="2018-12-01"
+                value-format="YYYY-MM-DD"
                 :rules="['required']"
                 :columns="{
                   container: 6,
@@ -456,13 +455,13 @@
           </template>
         </Vueform>
       </UCard>
-    </div>
-  </UContainer>
+    </UContainer>
+  </UPageBody>
 </template>
 
 <script setup lang="ts">
 import { useDaDataAddress } from '@/daDataService/useDaDataAddress';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, nextTick } from 'vue';
 import { useFormsStore } from '@/forms/formDataStore';
 import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
@@ -505,16 +504,46 @@ const form$ = ref<Vueform | null>(null);
  * Загружает сохранённую форму из localStorage, включая все шаги (включая movements).
  */
 async function loadStoredForm(): Promise<boolean> {
-  if (!form$.value) return false;
-
   const storedForm: string | null = localStorage.getItem('form');
   if (!storedForm) return false;
 
   try {
-    const parsedData = JSON.parse(storedForm);
+    const parsedData = JSON.parse(storedForm) as Record<string, unknown>;
+    // console.warn('[DayMovements] Loading stored form data:', parsedData);
+    // console.warn(
+    //   '[DayMovements] Birthday value:',
+    //   parsedData.birthday,
+    //   typeof parsedData.birthday
+    // );
+
+    // Ждём, пока форма полностью инициализируется
+    await nextTick();
+
+    if (!form$.value) {
+      console.warn('[DayMovements] Form not ready after nextTick, waiting...');
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      if (!form$.value) {
+        console.error('[DayMovements] Form still not ready');
+        return false;
+      }
+    }
+
+    // Сначала устанавливаем данные в store (для синхронизации с v-model)
+    store.dayMovements = { ...store.dayMovements, ...parsedData };
+
+    // Затем загружаем через метод load() для полной инициализации формы
+    // @ts-expect-error - parsedData is a valid object (no idea why it's working against docs)
     await form$.value.load(parsedData);
+
+    // Проверяем, что данные загрузились
+    await nextTick();
+    // const formData = form$.value.data as Record<string, unknown> | undefined;
+    // console.warn('[DayMovements] Form data after load:', formData);
+    // console.warn('[DayMovements] Birthday in form:', formData?.birthday);
+
     return true;
-  } catch {
+  } catch (error) {
+    console.error('[DayMovements] Error loading stored form:', error);
     localStorage.removeItem('form');
     return false;
   }
@@ -655,7 +684,14 @@ function setupFormChangeListener(): void {
 }
 
 onMounted(async () => {
-  if (!form$.value) return;
+  // Ждём, пока форма полностью смонтируется
+  await nextTick();
+
+  if (!form$.value) {
+    // Если форма всё ещё не готова, ждём ещё немного
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!form$.value) return;
+  }
 
   // Сначала пытается загрузить сохранённую форму (включая movements)
   const hasStoredForm = await loadStoredForm();
@@ -665,7 +701,6 @@ onMounted(async () => {
     await prefillFromProfile();
   }
 
-  // Настраивает автосохранение изменений
   setupFormChangeListener();
 });
 

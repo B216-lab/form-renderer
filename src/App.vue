@@ -64,6 +64,7 @@ const dismissCookieNotice = () => {
       :title="t('app.title')"
       to="http://al@b216.org/"
     >
+      <template #default>{{ t('app.headerTitle') }}</template>
       <template #right>
         <div class="flex items-center gap-3">
           <UColorModeButton />
@@ -82,20 +83,66 @@ const dismissCookieNotice = () => {
     <UMain>
       <router-view />
     </UMain>
+    <UFooter>
+      <template #left>
+        <p class="text-muted text-sm">
+          ООО «Б216» © {{ new Date().getFullYear() }}
+        </p>
+      </template>
+
+      <template #default>
+        <span class="text-muted text-sm">
+          ОГРН
+          <span
+            class="px-1 py-1 rounded-md border bg-muted text-xs font-mono mx-1"
+            >1243800017603</span
+          >
+          <span class="inline-block w-8"></span>
+          ИНН
+          <span
+            class="px-1 py-1 rounded-md border bg-muted text-xs font-mono mx-1"
+            >3812163477</span
+          >
+          <span class="inline-block w-8"></span>
+          КПП
+          <span
+            class="px-1 py-1 rounded-md border bg-muted text-xs font-mono mx-1"
+            >381201001</span
+          >
+        </span>
+      </template>
+
+      <template #right>
+        <UButton
+          icon="i-lucide-send"
+          color="neutral"
+          variant="ghost"
+          to="http://t.me/ALevashev"
+          target="_blank"
+          aria-label="Telegram"
+        />
+        <UButton
+          icon="i-lucide-mail"
+          color="neutral"
+          variant="ghost"
+          to="mailto:al@b216.org"
+          target="_blank"
+          aria-label="Email"
+        />
+      </template>
+    </UFooter>
     <UAlert
       v-if="showCookieNotice"
       class="fixed bottom-4 right-4 max-w-sm z-50"
       color="neutral"
-      variant="solid"
+      variant="subtle"
       icon="i-lucide-cookie"
       :title="t('app.cookieTitle')"
       :description="t('app.cookieDescription')"
     >
       <template #actions>
         <UButton
-          color="neutral"
-          size="xs"
-          variant="ghost"
+          size="sm"
           @click="dismissCookieNotice"
         >
           {{ t('app.cookieClose') }}

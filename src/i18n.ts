@@ -70,6 +70,7 @@ export const messages = {
   ru: {
     app: {
       title: 'Б216 | Анкета',
+      headerTitle: 'Транспортное анкетирование',
       description: 'Веб-форма анкеты Б216.',
       logout: 'Выйти',
       cookieTitle: 'Файлы cookie',

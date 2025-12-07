@@ -1,9 +1,7 @@
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center bg-[var(--n-body-color)] px-4"
-  >
-    <UCard class="w-full max-w-md">
-      <div class="space-y-6">
+  <div class="flex items-center justify-center min-h-[calc(100vh-4rem)] py-8">
+    <div class="w-full max-w-md">
+      <UCard>
         <UForm
           as="form"
           class="space-y-4"
@@ -14,11 +12,10 @@
             :error="emailError"
           >
             <UInput
-              ref="emailInputRef"
               v-model="email"
               type="email"
+              :autofocus="true"
               trailing-icon="i-lucide-at-sign"
-              autocomplete="email"
               placeholder="user@example.com"
               :disabled="authStore.isLoading || (isOttMode && tokenRequested)"
               class="w-full"
@@ -101,19 +98,30 @@
             name="consent"
             :error="consentError"
           >
-            <div class="flex items-start gap-2 text-xs text-gray-500">
-              <UCheckbox v-model="consentAccepted" />
-              <p>
+            <div class="flex items-center">
+              <UCheckbox
+                v-model="consentAccepted"
+                class="mr-2"
+              />
+              <span
+                variant="link"
+                color="neutral"
+                class="p-0 m-0 mr-1"
+              >
                 {{ t('auth.consentLabel') }}
+
                 <a
-                  href="/consent"
+                  class="p-0 m-0 text-info"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  class="underline"
+                  href="/consent"
                 >
                   {{ t('auth.consentLink') }}
+                  <UIcon
+                    name="i-lucide-external-link"
+                    class="size-4 align-middle inline-block text-info ml-0.5 mb-0.5"
+                  />
                 </a>
-              </p>
+              </span>
             </div>
           </UFormField>
 
@@ -166,27 +174,18 @@
             </template>
           </div>
         </UForm>
-      </div>
-    </UCard>
+      </UCard>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: 'LoginScreen' });
 
-import {
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  computed,
-  watch,
-  nextTick,
-  type ComponentPublicInstance,
-} from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { z } from 'zod';
-
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
@@ -210,7 +209,6 @@ const tokenRequested = ref(false);
 const ottExpiresAt = ref<Date | null>(null);
 const ottRemainingSeconds = ref(0);
 const emailError = ref('');
-const emailInputRef = ref<ComponentPublicInstance | null>(null);
 const consentAccepted = ref(false);
 const consentError = ref('');
 
@@ -455,16 +453,6 @@ onMounted(async () => {
     }
   } else {
     authMode.value = 'ott';
-  }
-
-  // Фокусируем поле email после монтирования
-  await nextTick();
-  const inputElement =
-    emailInputRef.value?.$el?.querySelector('input') ||
-    emailInputRef.value?.$el?.querySelector('input[type="email"]') ||
-    document.querySelector('input[type="email"]');
-  if (inputElement instanceof HTMLInputElement) {
-    inputElement.focus();
   }
 });
 
