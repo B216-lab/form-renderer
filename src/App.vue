@@ -12,6 +12,7 @@ const { t, locale } = useI18n();
 const showCookieNotice = ref(false);
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
+const userEmail = computed(() => authStore.user?.username || null);
 
 const handleLogout = async () => {
   try {
@@ -67,6 +68,12 @@ const dismissCookieNotice = () => {
       <template #default>{{ t('app.headerTitle') }}</template>
       <template #right>
         <div class="flex items-center gap-3">
+          <span
+            v-if="isAuthenticated && userEmail"
+            class="text-sm text-gray-600 dark:text-gray-400"
+          >
+            {{ userEmail }}
+          </span>
           <UColorModeButton />
           <UButton
             v-if="isAuthenticated"
@@ -91,7 +98,7 @@ const dismissCookieNotice = () => {
       </template>
 
       <template #default>
-        <span class="text-muted text-sm">
+        <span class="text-muted text-sm flex items-center">
           ОГРН
           <span
             class="px-1 py-1 rounded-md border bg-muted text-xs font-mono mx-1"

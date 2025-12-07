@@ -11,9 +11,11 @@
           :add-class="'vf-create-account'"
           size="md"
           :display-errors="false"
-          :endpoint="FORM_ENDPOINT"
+          :endpoint="submitForm"
+          :prepare="prepareFormData"
           method="post"
           @success="handleSuccess"
+          @error="handleError"
         >
           <template #empty>
             <FormSteps>
@@ -466,223 +468,81 @@ import { useFormsStore } from '@/forms/formDataStore';
 import type { Vueform } from '@vueform/vueform';
 import { enumToOptions } from './enums';
 import { Gender, SocialStatus, TypeMovement, Transport, Place } from './enums';
-import { Validator } from '@vueform/vueform';
-import type { DaDataAddressSuggestion } from 'react-dadata';
 import SuccessScreen from '@/components/SuccessScreen.vue';
-import { apiFetch, ApiHttpError, ApiNetworkError } from '@/api';
+import { precise } from './validators';
+import { submitForm } from './formSubmission';
+import { loadStoredForm, setupFormChangeListener } from './formPersistence';
+import { prefillFromProfile } from './profilePrefill';
+import { prepareFormData } from './addressUtils';
+import { ApiHttpError, ApiNetworkError } from '@/api';
+import { useI18n } from 'vue-i18n';
 
-const precise = class extends Validator {
-  check(suggestion: DaDataAddressSuggestion | null) {
-    const address = suggestion?.data;
-    if (
-      !address ||
-      typeof address !== 'object' ||
-      !('house' in address) ||
-      !address.house
-    ) {
-      return false;
-    }
-    return true;
-  }
-  get msg() {
-    return 'Адрес должен содержать номер дома';
-  }
-};
-
+// Store и computed данные
 const store = useFormsStore();
-
-const FORM_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL}/api/v1/public/forms/movements`;
-
 const data = computed({
   get: () => store.dayMovements,
   set: (data) => (store.dayMovements = data),
 });
 
+// Form ref
 const form$ = ref<Vueform | null>(null);
 
-/**
- * Загружает сохранённую форму из localStorage, включая все шаги (включая movements).
- */
-async function loadStoredForm(): Promise<boolean> {
-  const storedForm: string | null = localStorage.getItem('form');
-  if (!storedForm) return false;
+// DaData настройки
+const { getAddressItems, ADDRESS_DELAY, DEFAULT_MIN_CHARS } =
+  useDaDataAddress(3);
 
-  try {
-    const parsedData = JSON.parse(storedForm) as Record<string, unknown>;
-    // console.warn('[DayMovements] Loading stored form data:', parsedData);
-    // console.warn(
-    //   '[DayMovements] Birthday value:',
-    //   parsedData.birthday,
-    //   typeof parsedData.birthday
-    // );
+// Состояние формы
+const isSubmitted = ref(false);
+const ADDRESS_SUGGESTION_HINT =
+  'Начните вводить адрес, чтобы увидеть подсказки и выбрать нужный вариант. Необходимо выбрать из списка с точностью до дома';
 
-    // Ждём, пока форма полностью инициализируется
-    await nextTick();
+// i18n
+const { t } = useI18n();
 
-    if (!form$.value) {
-      console.warn('[DayMovements] Form not ready after nextTick, waiting...');
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      if (!form$.value) {
-        console.error('[DayMovements] Form still not ready');
-        return false;
-      }
-    }
+// Обработчики
+const handleSuccess = () => {
+  isSubmitted.value = true;
+};
 
-    // Сначала устанавливаем данные в store (для синхронизации с v-model)
-    store.dayMovements = { ...store.dayMovements, ...parsedData };
+// eslint-disable-next-line no-undef
+const toast = useToast();
 
-    // Затем загружаем через метод load() для полной инициализации формы
-    // @ts-expect-error - parsedData is a valid object (no idea why it's working against docs)
-    await form$.value.load(parsedData);
+const handleError = (error: ApiHttpError | ApiNetworkError) => {
+  // Определяем сообщение об ошибке
+  let errorMessage = t('forms.errors.defaultMessage');
+  let errorTitle = t('forms.errors.defaultTitle');
 
-    // Проверяем, что данные загрузились
-    await nextTick();
-    // const formData = form$.value.data as Record<string, unknown> | undefined;
-    // console.warn('[DayMovements] Form data after load:', formData);
-    // console.warn('[DayMovements] Birthday in form:', formData?.birthday);
-
-    return true;
-  } catch (error) {
-    console.error('[DayMovements] Error loading stored form:', error);
-    localStorage.removeItem('form');
-    return false;
-  }
-}
-
-/**
- * Предзаполняет форму данными из профиля пользователя (только первая страница).
- */
-async function prefillFromProfile(): Promise<void> {
-  if (!form$.value) return;
-
-  try {
-    const response = await apiFetch('/api/v1/auth/me', { method: 'GET' });
-    const profile = await response.json();
-
-    if (profile.error) {
-      return; // Неавторизованный пользователь
-    }
-
-    const current = (data.value || {}) as Record<string, unknown>;
-
-    // День рождения
-    if (profile.birthday) {
-      current.birthday = profile.birthday;
-    }
-
-    // Пол
-    if (profile.gender) {
-      current.gender = profile.gender;
-    }
-
-    // Социальное положение
-    if (profile.socialStatus) {
-      current.socialStatus = profile.socialStatus;
-    }
-
-    // Расходы на транспорт
-    if (typeof profile.transportationCostMin === 'number') {
-      current.transportCostMin = profile.transportationCostMin;
-    }
-    if (typeof profile.transportationCostMax === 'number') {
-      current.transportCostMax = profile.transportationCostMax;
-    }
-
-    // Доход: min/maxSalary -> incomeMin/Max
-    if (typeof profile.minSalary === 'number') {
-      current.incomeMin = profile.minSalary;
-    }
-    if (typeof profile.maxSalary === 'number') {
-      current.incomeMax = profile.maxSalary;
-    }
-
-    // Адрес: сопоставление подсказки DaData по homeReadablePlace и координатам
-    await prefillAddressFromProfile(current, profile);
-
-    data.value = current;
-  } catch (err) {
-    if (err instanceof ApiHttpError || err instanceof ApiNetworkError) {
-      console.warn('[DayMovements] Unable to prefill from user profile', err);
-    }
-  }
-}
-
-/**
- * Предзаполняет поле coordinatesAddress из профиля пользователя.
- * Поддерживает GeoJSON Point формат: {"type": "Point", "coordinates": [lon, lat]}
- */
-async function prefillAddressFromProfile(
-  current: Record<string, unknown>,
-  profile: Record<string, unknown>
-): Promise<void> {
-  if (!profile.homeReadablePlace || !profile.homePlace) {
-    return;
-  }
-
-  const homeReadablePlace = profile.homeReadablePlace as string;
-  const homePlace = profile.homePlace as {
-    type?: string;
-    coordinates?: [number, number];
-    data?: { geo_lat?: string; geo_lon?: string };
-    [key: string]: unknown;
-  };
-
-  try {
-    const suggestions = await getAddressItems(homeReadablePlace);
-
-    // Извлекает координаты из GeoJSON Point или DaData формата
-    let storedLat: string | undefined;
-    let storedLon: string | undefined;
-
-    if (homePlace.type === 'Point' && Array.isArray(homePlace.coordinates)) {
-      // GeoJSON Point: coordinates = [longitude, latitude]
-      storedLon = homePlace.coordinates[0]?.toString();
-      storedLat = homePlace.coordinates[1]?.toString();
-    } else if (homePlace.data) {
-      // DaData формат (для обратной совместимости)
-      storedLat = homePlace.data.geo_lat;
-      storedLon = homePlace.data.geo_lon;
-    }
-
-    if (!storedLat || !storedLon) {
-      return;
-    }
-
-    const matchedSuggestion = (suggestions as DaDataAddressSuggestion[]).find(
-      (s) => {
-        const d = s.data as { geo_lat?: string; geo_lon?: string };
-        return d?.geo_lat === storedLat && d?.geo_lon === storedLon;
-      }
-    );
-
-    if (matchedSuggestion) {
-      current.coordinatesAddress = matchedSuggestion;
+  if (error instanceof ApiNetworkError) {
+    errorTitle = t('forms.errors.networkTitle');
+    errorMessage = error.message || t('forms.errors.networkMessage');
+  } else if (error instanceof ApiHttpError) {
+    errorTitle = t('forms.errors.serverTitle');
+    if (error.status === 400) {
+      errorMessage = t('forms.errors.invalidData');
+    } else if (error.status === 401) {
+      errorMessage = t('forms.errors.sessionExpired');
+    } else if (error.status === 403) {
+      errorMessage = t('forms.errors.insufficientPermissions');
+    } else if (error.status === 404) {
+      errorMessage = t('forms.errors.serverUnavailable');
+    } else if (error.status >= 500) {
+      errorMessage = t('forms.errors.internalError');
     } else {
-      console.warn(
-        '[DaData] Stored homePlace coordinates not found among suggestions for homeReadablePlace',
-        { homeReadablePlace, homePlace }
-      );
-    }
-  } catch (err) {
-    if (!(err instanceof ApiHttpError) && !(err instanceof ApiNetworkError)) {
-      console.warn('[DaData] Unexpected error during address prefill', err);
+      errorMessage = error.message || t('forms.errors.defaultMessage');
     }
   }
-}
 
-/**
- * Настраивает слушатель изменений формы для сохранения в localStorage.
- */
-function setupFormChangeListener(): void {
-  if (!form$.value) return;
-
-  form$.value.on('change', () => {
-    if (form$.value) {
-      localStorage.setItem('form', JSON.stringify(form$.value.data));
-    }
+  // Показываем уведомление об ошибке
+  toast.add({
+    title: errorTitle,
+    description: errorMessage,
+    color: 'error',
+    icon: 'i-lucide-alert-circle',
+    duration: 5000,
   });
-}
+};
 
+// Инициализация формы
 onMounted(async () => {
   // Ждём, пока форма полностью смонтируется
   await nextTick();
@@ -694,26 +554,15 @@ onMounted(async () => {
   }
 
   // Сначала пытается загрузить сохранённую форму (включая movements)
-  const hasStoredForm = await loadStoredForm();
+  const hasStoredForm = await loadStoredForm(form$);
 
   // Если нет сохранённой формы, предзаполняет из профиля
   if (!hasStoredForm) {
-    await prefillFromProfile();
+    await prefillFromProfile(form$, data, getAddressItems);
   }
 
-  setupFormChangeListener();
+  setupFormChangeListener(form$);
 });
-
-const { getAddressItems, ADDRESS_DELAY, DEFAULT_MIN_CHARS } =
-  useDaDataAddress(3);
-
-const isSubmitted = ref(false);
-const ADDRESS_SUGGESTION_HINT =
-  'Начните вводить адрес, чтобы увидеть подсказки и выбрать нужный вариант. Необходимо выбрать из списка с точностью до дома';
-
-const handleSuccess = () => {
-  isSubmitted.value = true;
-};
 </script>
 
 <style lang="scss">
