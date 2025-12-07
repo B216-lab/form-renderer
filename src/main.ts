@@ -1,6 +1,6 @@
 import './style.css';
 
-import { createApp, nextTick, watch } from 'vue';
+import { createApp, watch } from 'vue';
 import App from './App.vue';
 import Vueform from '@vueform/vueform';
 import vueformConfig from './../vueform.config';
@@ -66,17 +66,8 @@ authStore
     app.mount('#app');
 
     if (authStore.lastNetworkError) {
-      // Ждём следующего тика, чтобы убедиться, что все компоненты смонтированы
-      await nextTick();
-      // Дополнительная небольшая задержка для инициализации message API
-      setTimeout(() => {
-        if (authStore.lastNetworkError) {
-          console.warn(
-            '[Auth] Initial auth check failed:',
-            authStore.lastNetworkError
-          );
-          authStore.lastNetworkError = null;
-        }
-      }, 50);
+      // Очищаем сохранённую сетевую ошибку без логирования в консоль,
+      // чтобы не засорять логи скрытыми от пользователя ошибками
+      authStore.lastNetworkError = null;
     }
   });

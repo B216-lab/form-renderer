@@ -1,4 +1,3 @@
-import type { MessageApi } from 'naive-ui';
 import {
   ApiNetworkError,
   ApiHttpError,
@@ -6,11 +5,21 @@ import {
   ApiInternalHttpError,
 } from '../api';
 
+interface MessageApiLike {
+  error: (
+    message: string,
+    options?: {
+      duration?: number;
+      closable?: boolean;
+    }
+  ) => void;
+}
+
 /**
  * Глобальный экземпляр message API для показа уведомлений.
  * Устанавливается при инициализации приложения.
  */
-let globalMessageApi: MessageApi | null = null;
+let globalMessageApi: MessageApiLike | null = null;
 
 /**
  * Очередь ошибок, которые нужно показать после инициализации message API.
@@ -20,9 +29,9 @@ const errorQueue: unknown[] = [];
 /**
  * Устанавливает глобальный экземпляр message API.
  *
- * @param messageApi экземпляр message API из useMessage()
+ * @param messageApi экземпляр message API
  */
-export function setGlobalMessageApi(messageApi: MessageApi): void {
+export function setGlobalMessageApi(messageApi: MessageApiLike): void {
   globalMessageApi = messageApi;
 
   // Показываем все накопленные ошибки
@@ -44,13 +53,12 @@ export function handleApiError(
   error: unknown,
   defaultMessage = 'Произошла ошибка при выполнении запроса'
 ): void {
-  // Внутренние (сервисные) ошибки: логировать в консоль
+  // Внутренние (сервисные) ошибки: не показываем пользователю и не логируем,
+  // так как они не влияют на текущий UX
   if (
     error instanceof ApiInternalNetworkError ||
     error instanceof ApiInternalHttpError
   ) {
-    // eslint-disable-next-line no-console
-    console.warn('[internal API error]', error);
     return;
   }
 

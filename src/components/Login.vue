@@ -57,13 +57,12 @@
 
           <UFormField
             v-if="isOttMode && tokenRequested"
-            :label="t('auth.ottLabel')"
             name="ottToken"
           >
             <UInput
               v-model="ottToken"
               type="password"
-              :placeholder="t('auth.ottPlaceholder')"
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
               :disabled="authStore.isLoading"
               class="w-full font-mono text-xs"
             />

@@ -41,8 +41,6 @@ export const messages = {
       passwordPlaceholder: 'Enter password',
       confirmPassword: 'Repeat password',
       confirmPasswordPlaceholder: 'Repeat password',
-      ottLabel: 'Code from email',
-      ottPlaceholder: 'Paste or type the code',
       ottSentTitle: 'Code sent',
       ottSentDescription:
         'The code has been sent to {email}. Check your inbox and enter the code.',
@@ -86,7 +84,6 @@ export const messages = {
       confirmPassword: 'Повторите пароль',
       confirmPasswordPlaceholder: 'Повторите пароль',
       ottLabel: 'Код из письма',
-      ottPlaceholder: 'Вставьте или введите код',
       ottSentTitle: 'Код отправлен',
       ottSentDescription:
         'Код отправлен на {email}. Проверьте почту и введите код.',

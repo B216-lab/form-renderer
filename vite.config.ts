@@ -13,9 +13,8 @@ export default defineConfig({
       ui: {
         colors: {
           primary: 'green',
-          neutral: 'slate',
+          neutral: 'zinc',
         },
-
         icons: {
           light: 'i-ph-sun',
           dark: 'i-ph-moon',
