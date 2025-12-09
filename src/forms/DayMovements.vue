@@ -474,6 +474,7 @@ import { simplifyAddress } from './addressUtils';
 import { ApiHttpError, ApiNetworkError } from '@/api';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useToast } from '@nuxt/ui/composables';
 
 // Store и computed данные
 const store = useFormsStore();
@@ -515,7 +516,6 @@ const handleSuccess = () => {
   localStorage.setItem('form', JSON.stringify(parsedData));
 };
 
-// eslint-disable-next-line no-undef
 const toast = useToast();
 
 const handleError = (error: ApiHttpError | ApiNetworkError) => {
