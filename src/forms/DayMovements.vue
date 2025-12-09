@@ -177,7 +177,8 @@
                 field-name="date_id"
                 description="Нужно будет описать передвижения за этот день"
               />
-              <ListElement
+              <component
+                :is="'ListElement'"
                 name="movements"
                 :min="1"
                 label="Передвижения"
@@ -343,11 +344,7 @@
                         input-type="search"
                         autocomplete="off"
                         :description="ADDRESS_SUGGESTION_HINT"
-                        :rules="[
-                          'required',
-                          precise,
-                          'different:movements.*.container.arrivalAddress',
-                        ]"
+                        :rules="['required', precise]"
                         :conditions="[
                           [
                             'movements.*.container.departurePlace',
@@ -428,11 +425,7 @@
                         autocomplete="off"
                         label="Адрес прибытия"
                         :description="ADDRESS_SUGGESTION_HINT"
-                        :rules="[
-                          'required',
-                          precise,
-                          'different:movements.*.container.departureAddress', // TODO проверить, что между отправлениями не валидирует
-                        ]"
+                        :rules="['required', precise]"
                         :conditions="[
                           [
                             'movements.*.container.arrivalPlace',
@@ -446,14 +439,15 @@
                         tag="hr"
                       />
                       <TextareaElement
-                        name="textarea"
+                        name="comment"
+                        :rules="['max:2000']"
                         label="Комментарий"
                         description="Пожелания по улучшению транспортной инфраструктуры"
                       />
                     </GroupElement>
                   </ObjectElement>
                 </template>
-              </ListElement>
+              </component>
             </FormElements>
 
             <FormStepsControls />

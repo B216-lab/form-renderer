@@ -68,7 +68,8 @@ describe('formSubmission', () => {
     await submitForm(new FormData(), mockForm);
 
     const callArgs = vi.mocked(apiModule.apiFetch).mock.calls[0];
-    const body = callArgs[1]?.body as string;
+    expect(callArgs).toBeDefined();
+    const body = callArgs![1]?.body as string;
     const parsedBody = JSON.parse(body);
 
     expect(parsedBody).toEqual(formData);
