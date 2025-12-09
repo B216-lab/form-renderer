@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:ui": "vitest --ui --coverage"
   },
   "packageManager": "pnpm@10.23.0",
   "dependencies": {
@@ -27,16 +32,21 @@
     "@eslint/js": "^9.37.0",
     "@types/node": "^24.5.2",
     "@vitejs/plugin-vue": "^6.0.1",
+    "@vitest/coverage-v8": "^4.0.15",
+    "@vitest/ui": "^4.0.15",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "eslint": "^9.37.0",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^16.4.0",
     "jiti": "^2.6.1",
+    "jsdom": "^25.0.1",
     "prettier": "3.7.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.46.1",
     "vite": "^7.1.7",
     "vite-plugin-vue-devtools": "^8.0.3",
+    "vitest": "^4.0.15",
     "vue-tsc": "^3.0.7"
   }
 }

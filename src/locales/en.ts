@@ -59,5 +59,10 @@ export default {
       internalError: 'Internal server error. Please try again later.',
     },
   },
+  successScreen: {
+    title: 'Thank you!',
+    message: 'Your form has been successfully submitted. Thank you for participating in the survey.',
+    fillAnotherForm: 'Fill another form',
+  },
 } as const;
 

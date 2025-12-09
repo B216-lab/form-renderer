@@ -12,7 +12,6 @@
           size="md"
           :display-errors="false"
           :endpoint="submitForm"
-          :prepare="prepareFormData"
           method="post"
           @success="handleSuccess"
           @error="handleError"
@@ -83,6 +82,7 @@
                 :items="getAddressItems"
                 :resolve-on-load="false"
                 :delay="ADDRESS_DELAY"
+                :format-data="simplifyAddress"
                 label-prop="value"
                 :object="true"
                 allow-absent
@@ -331,6 +331,7 @@
                         :items="getAddressItems"
                         :delay="ADDRESS_DELAY"
                         :search="true"
+                        :format-data="simplifyAddress"
                         label-prop="value"
                         :object="true"
                         allow-absent
@@ -415,6 +416,7 @@
                         :items="getAddressItems"
                         :delay="ADDRESS_DELAY"
                         :search="true"
+                        :format-data="simplifyAddress"
                         label-prop="value"
                         :object="true"
                         allow-absent
@@ -474,7 +476,7 @@ import { precise } from './validators';
 import { submitForm } from './formSubmission';
 import { loadStoredForm, setupFormChangeListener } from './formPersistence';
 import { prefillFromProfile } from './profilePrefill';
-import { prepareFormData } from './addressUtils';
+import { simplifyAddress } from './addressUtils';
 import { ApiHttpError, ApiNetworkError } from '@/api';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';

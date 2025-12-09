@@ -1,6 +1,5 @@
 import type { Vueform } from '@vueform/vueform';
 import { apiFetch } from '@/api';
-import { prepareFormData } from './addressUtils';
 
 const FORM_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL}/api/v1/forms/movements`;
 
@@ -20,18 +19,14 @@ export async function submitForm(
   // Используем requestData, который исключает условные элементы и форматирует как JSON
   const rawData = form$.requestData as Record<string, unknown>;
 
-  // Подготавливаем данные: упрощаем адреса
-  const preparedData = prepareFormData(rawData);
-
   // Отправляем данные через apiFetch, который автоматически добавляет cookies и CSRF токен
   const response = await apiFetch(FORM_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(preparedData),
+    body: JSON.stringify(rawData),
   });
 
   return response;
 }
-
