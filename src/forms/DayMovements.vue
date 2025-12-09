@@ -180,6 +180,7 @@
               <ListElement
                 name="movements"
                 :min="1"
+                label="Передвижения"
                 :max="15"
                 add-text="Добавить передвижение"
                 :rules="['required', 'min:1', 'max:15']"
@@ -476,6 +477,7 @@ import { prefillFromProfile } from './profilePrefill';
 import { prepareFormData } from './addressUtils';
 import { ApiHttpError, ApiNetworkError } from '@/api';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 // Store и computed данные
 const store = useFormsStore();
@@ -499,9 +501,22 @@ const ADDRESS_SUGGESTION_HINT =
 // i18n
 const { t } = useI18n();
 
+// Router
+const router = useRouter();
+
 // Обработчики
 const handleSuccess = () => {
   isSubmitted.value = true;
+  const formData = localStorage.getItem('form');
+  if (import.meta.env.DEV) {
+    return;
+  }
+  if (!formData) {
+    return;
+  }
+  const parsedData = JSON.parse(formData) as Record<string, unknown>;
+  parsedData.movements = {};
+  localStorage.setItem('form', JSON.stringify(parsedData));
 };
 
 // eslint-disable-next-line no-undef
@@ -521,6 +536,20 @@ const handleError = (error: ApiHttpError | ApiNetworkError) => {
       errorMessage = t('forms.errors.invalidData');
     } else if (error.status === 401) {
       errorMessage = t('forms.errors.sessionExpired');
+      // Показываем уведомление и перенаправляем на страницу входа
+      toast.add({
+        title: errorTitle,
+        description: errorMessage,
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+        duration: 5000,
+      });
+      // Перенаправляем на страницу входа с параметром о истечении сессии
+      router.push({
+        name: 'login',
+        query: { sessionExpired: 'true' },
+      });
+      return;
     } else if (error.status === 403) {
       errorMessage = t('forms.errors.insufficientPermissions');
     } else if (error.status === 404) {

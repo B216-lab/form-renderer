@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@unhead/vue';
 import * as uiLocales from '@nuxt/ui/locale';
@@ -8,6 +8,7 @@ import { useAuthStore } from './stores/authStore';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 const { t, locale } = useI18n();
 const showCookieNotice = ref(false);
 
@@ -88,8 +89,9 @@ const dismissCookieNotice = () => {
       </template>
     </UHeader>
     <UMain>
-      <router-view />
+      <router-view :key="route.fullPath" />
     </UMain>
+    <!-- UFooter extracted and muted for now
     <UFooter>
       <template #left>
         <p class="text-muted text-sm">
@@ -138,6 +140,7 @@ const dismissCookieNotice = () => {
         />
       </template>
     </UFooter>
+    -->
     <UAlert
       v-if="showCookieNotice"
       class="fixed bottom-4 right-4 max-w-sm z-50"

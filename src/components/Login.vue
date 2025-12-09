@@ -87,6 +87,15 @@
           />
 
           <UAlert
+            v-if="showSessionExpiredAlert"
+            color="warning"
+            variant="subtle"
+            :title="t('forms.errors.sessionExpiredTitle')"
+            :description="t('forms.errors.sessionExpired')"
+            icon="i-lucide-clock"
+          />
+
+          <UAlert
             v-if="errorMessage"
             color="error"
             variant="subtle"
@@ -211,6 +220,7 @@ const ottRemainingSeconds = ref(0);
 const emailError = ref('');
 const consentAccepted = ref(false);
 const consentError = ref('');
+const showSessionExpiredAlert = ref(false);
 
 const emailSchema = z
   .string()
@@ -437,6 +447,13 @@ onMounted(async () => {
   tokenRequested.value = false;
   emailError.value = '';
   consentAccepted.value = false;
+
+  // Проверяем, был ли редирект из-за истечения сессии
+  if (route.query.sessionExpired === 'true') {
+    showSessionExpiredAlert.value = true;
+    // Удаляем query параметр из URL
+    router.replace({ query: {} });
+  }
 
   // Попытка восстановить состояние OTT из localStorage
   const storedSession = loadOttSession();

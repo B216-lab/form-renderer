@@ -51,7 +51,8 @@ export default {
         'Failed to connect to the server. Please check your internet connection.',
       serverTitle: 'Server error',
       invalidData: 'Invalid form data. Please check the filled fields.',
-      sessionExpired: 'Session expired. Please log in again.',
+      sessionExpiredTitle: 'Session expired',
+      sessionExpired: 'Your session has expired. Please log in again.',
       insufficientPermissions:
         'Insufficient permissions to perform the operation.',
       serverUnavailable: 'Server unavailable or endpoint not found.',
