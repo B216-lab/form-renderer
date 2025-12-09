@@ -1,20 +1,48 @@
-# syntax=docker/dockerfile:1
-FROM node:25-bullseye-slim
+FROM node:25-bullseye-slim AS builder
 
-ENV NODE_ENV=production
 WORKDIR /app
+
+RUN npm install -g corepack && \
+    corepack enable && \
+    corepack install
 
 COPY package.json pnpm-lock.yaml* ./
 
-RUN npm install -g corepack; \
-    corepack enable; \
-    corepack install; \
-    pnpm install --frozen-lockfile;
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
 RUN pnpm run build
 
+FROM node:25-bullseye-slim
+
+LABEL org.opencontainers.image.title="Geoform" \
+    org.opencontainers.image.description="Vue.js application for geodata collection" \
+    org.opencontainers.image.version="0.0.0" \
+    org.opencontainers.image.vendor="B216" \
+    org.opencontainers.image.licenses="GPL-3.0" \
+    org.opencontainers.image.authors="Kirill Zhilenkov & B216 Team" \
+    org.opencontainers.image.source="https://github.com/b216/manual-geoform" \
+    org.opencontainers.image.url="https://github.com/b216/manual-geoform" \
+    maintainer="Kirill Zhilenkov & B216 Team"
+
+RUN corepack enable && corepack install
+
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=4173
+
+WORKDIR /app
+
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml* ./
+
+RUN pnpm install --frozen-lockfile --prod
+
+RUN pnpm add -D vite@latest
+
+COPY --from=builder /app/dist ./dist
+
+# default port
 EXPOSE 4173
 
-CMD pnpm run preview --host 0.0.0.0 --port 4173
+CMD ["sh", "-c", "pnpm run preview --host ${HOST} --port ${PORT}"]
