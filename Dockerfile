@@ -2,13 +2,11 @@ FROM node:25-bullseye-slim AS builder
 
 WORKDIR /app
 
-RUN npm install -g corepack && \
-    corepack enable && \
-    corepack install
-
 COPY package.json pnpm-lock.yaml* ./
 
-RUN pnpm install --frozen-lockfile
+# Install pnpm globally and then dependencies for build
+RUN npm install -g pnpm@10.23.0 && \
+    pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -26,8 +24,6 @@ LABEL org.opencontainers.image.title="Geoform" \
     org.opencontainers.image.url="https://github.com/b216/manual-geoform" \
     maintainer="Kirill Zhilenkov & B216 Team"
 
-RUN corepack enable && corepack install
-
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=4173
@@ -36,9 +32,10 @@ WORKDIR /app
 
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml* ./
 
-RUN pnpm install --frozen-lockfile --prod
+RUN npm install -g pnpm@10.23.0 && \
+    pnpm install --frozen-lockfile --prod && \
+    pnpm add -D vite@latest
 
-RUN pnpm add -D vite@latest
 
 COPY --from=builder /app/dist ./dist
 
