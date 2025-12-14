@@ -20,7 +20,7 @@ ENV VITE_DADATA_API=$VITE_DADATA_API
 
 RUN pnpm run build
 
-FROM node:25-bullseye-slim
+FROM node:25-bullseye
 
 LABEL org.opencontainers.image.title="Geoform" \
     org.opencontainers.image.description="Vue.js application for geodata collection" \
