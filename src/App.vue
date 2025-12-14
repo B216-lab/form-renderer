@@ -1,29 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useHead } from '@unhead/vue';
 import * as uiLocales from '@nuxt/ui/locale';
-import { useAuthStore } from './stores/authStore';
 
-const authStore = useAuthStore();
-const router = useRouter();
 const route = useRoute();
 const { t, locale } = useI18n();
 const showCookieNotice = ref(false);
-
-const isAuthenticated = computed(() => authStore.isAuthenticated);
-const userEmail = computed(() => authStore.user?.username || null);
-
-const handleLogout = async () => {
-  try {
-    await authStore.logout();
-  } catch {
-    // Игнорировать ошибки выхода, так как локальное состояние уже очищено
-  } finally {
-    await router.push({ name: 'login' });
-  }
-};
 
 const uiLocale = computed(() => {
   const current = (locale.value as keyof typeof uiLocales) || 'en';
@@ -69,22 +53,7 @@ const dismissCookieNotice = () => {
       <template #default>{{ t('app.headerTitle') }}</template>
       <template #right>
         <div class="flex items-center gap-3">
-          <span
-            v-if="isAuthenticated && userEmail"
-            class="text-sm text-gray-600 dark:text-gray-400"
-          >
-            {{ userEmail }}
-          </span>
           <UColorModeButton />
-          <UButton
-            v-if="isAuthenticated"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            @click="handleLogout"
-          >
-            {{ t('app.logout') }}
-          </UButton>
         </div>
       </template>
     </UHeader>

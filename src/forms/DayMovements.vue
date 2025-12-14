@@ -473,7 +473,7 @@ import { prefillFromProfile } from './profilePrefill';
 import { simplifyAddress } from './addressUtils';
 import { ApiHttpError, ApiNetworkError } from '@/api';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 import { useToast } from '@nuxt/ui/composables';
 
 // Store и computed данные
@@ -499,7 +499,7 @@ const ADDRESS_SUGGESTION_HINT =
 const { t } = useI18n();
 
 // Router
-const router = useRouter();
+// В публичном режиме перенаправление на страницу входа не требуется.
 
 // Обработчики
 const handleSuccess = () => {
@@ -532,18 +532,13 @@ const handleError = (error: ApiHttpError | ApiNetworkError) => {
       errorMessage = t('forms.errors.invalidData');
     } else if (error.status === 401) {
       errorMessage = t('forms.errors.sessionExpired');
-      // Показываем уведомление и перенаправляем на страницу входа
+      // Публичный режим: перенаправление на страницу входа не требуется.
       toast.add({
         title: errorTitle,
         description: errorMessage,
         color: 'error',
         icon: 'i-lucide-alert-circle',
         duration: 5000,
-      });
-      // Перенаправляем на страницу входа с параметром о истечении сессии
-      router.push({
-        name: 'login',
-        query: { sessionExpired: 'true' },
       });
       return;
     } else if (error.status === 403) {

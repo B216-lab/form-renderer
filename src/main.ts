@@ -6,7 +6,6 @@ import Vueform from '@vueform/vueform';
 import vueformConfig from './../vueform.config';
 import { createPinia } from 'pinia';
 import router from './router';
-import { useAuthStore } from './stores/authStore';
 import ui from '@nuxt/ui/vue-plugin';
 import * as UnheadVue from '@unhead/vue';
 import { z } from 'zod';
@@ -61,17 +60,4 @@ watch(
   { immediate: false }
 );
 
-const authStore = useAuthStore();
-
-authStore
-  .checkAuth()
-  .catch(() => undefined)
-  .finally(async () => {
-    app.mount('#app');
-
-    if (authStore.lastNetworkError) {
-      // Очищаем сохранённую сетевую ошибку без логирования в консоль,
-      // чтобы не засорять логи скрытыми от пользователя ошибками
-      authStore.lastNetworkError = null;
-    }
-  });
+app.mount('#app');

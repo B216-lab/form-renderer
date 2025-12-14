@@ -9,7 +9,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push({ name: 'login' });
+    router.push({ name: 'day-movements' });
   }
 };
 </script>

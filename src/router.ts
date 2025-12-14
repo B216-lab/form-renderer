@@ -3,28 +3,23 @@ import {
   createWebHistory,
   type RouteLocationNormalized,
 } from 'vue-router';
-import Login from './components/Login.vue';
 import Consent from './components/Consent.vue';
 import DayMovements from './forms/DayMovements.vue';
-import { useAuthStore } from './stores/authStore';
 
 const routes = [
-  {
-    path: '/login',
-    name: 'login',
-    component: Login,
-    meta: { guestOnly: true },
-  },
   {
     path: '/',
     name: 'day-movements',
     component: DayMovements,
-    meta: { requiresAuth: true },
   },
   {
     path: '/consent',
     name: 'consent',
     component: Consent,
+  },
+  {
+    path: '/login',
+    redirect: '/',
   },
   {
     path: '/:pathMatch(.*)*',
@@ -37,26 +32,6 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to: RouteLocationNormalized, _from, next) => {
-  const authStore = useAuthStore();
-
-  if (!authStore.isAuthenticated) {
-    // Попытка восстановления сессии при прямом переходе
-    await authStore.checkAuth().catch(() => undefined);
-  }
-
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({
-      name: 'login',
-      query: { redirect: to.fullPath },
-    });
-  }
-
-  if (to.meta.guestOnly && authStore.isAuthenticated) {
-    return next({ name: 'day-movements' });
-  }
-
-  return next();
-});
+router.beforeEach((_to: RouteLocationNormalized, _from, next) => next());
 
 export default router;
