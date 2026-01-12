@@ -5,11 +5,69 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
 
 /**
+ * Имя заголовка, через который CSRF-токен передаётся обратно на сервер.
+ * Совпадает с CookieCsrfTokenRepository.DEFAULT_CSRF_HEADER_NAME.
+ */
+const CSRF_HEADER_NAME = 'X-XSRF-TOKEN';
+
+/**
+ * Кешированное значение CSRF-токена и имени заголовка.
+ */
+let cachedCsrfToken: string | null = null;
+let cachedCsrfHeaderName: string = CSRF_HEADER_NAME;
+
+/**
  * Сбрасывает кеш CSRF-токена, чтобы при следующем запросе
  * он был заново получен с сервера.
  */
 export function resetCsrfTokenCache(): void {
-  // CSRF может быть отключён на сервере (публичный режим). Функция оставлена для обратной совместимости.
+  cachedCsrfToken = null;
+  cachedCsrfHeaderName = CSRF_HEADER_NAME;
+}
+
+/**
+ * Загружает CSRF-токен с бэкенда и кеширует его в памяти.
+ * Эндпоинт `/api/v1/auth/csrf` возвращает имя заголовка и значение токена.
+ */
+async function ensureCsrfTokenLoaded(): Promise<void> {
+  if (cachedCsrfToken) {
+    return;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/api/v1/auth/csrf`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof TypeError
+        ? 'Не удалось получить CSRF токен. Проверьте, что сервер запущен.'
+        : 'Ошибка сети при получении CSRF токена.';
+    throw new ApiInternalNetworkError(errorMessage, error);
+  }
+
+  if (!response.ok) {
+    throw new ApiInternalHttpError(
+      `Не удалось получить CSRF токен: ${response.status} ${response.statusText}`,
+      response.status,
+      response.statusText
+    );
+  }
+
+  const data = (await response.json()) as {
+    token?: string;
+    headerName?: string;
+  };
+
+  if (data.token) {
+    cachedCsrfToken = data.token;
+  }
+
+  if (data.headerName) {
+    cachedCsrfHeaderName = data.headerName;
+  }
 }
 
 /**
@@ -77,6 +135,21 @@ export async function apiFetch(
 
   const headers = new Headers(options.headers || {});
 
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Добавляет CSRF-токен для небезопасных методов (POST, PUT, PATCH, DELETE и т.п.)
+  // Spring Security ожидает токен в заголовке X-XSRF-TOKEN (или другом, если переопределён).
+  if (
+    !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method) &&
+    !headers.has(CSRF_HEADER_NAME)
+  ) {
+    await ensureCsrfTokenLoaded();
+
+    if (cachedCsrfToken) {
+      headers.set(cachedCsrfHeaderName, cachedCsrfToken);
+    }
+  }
+
   // Устанавливаем Content-Type для JSON, если не указан и есть тело
   if (
     options.body &&
@@ -91,7 +164,7 @@ export async function apiFetch(
     response = await fetch(url, {
       ...options,
       headers,
-      credentials: 'include',
+      credentials: 'include', // Критично: отправляет и получает cookies (JSESSIONID)
     });
   } catch (error) {
     // Сетевая ошибка (сервер недоступен, таймаут и т.д.)
@@ -101,6 +174,15 @@ export async function apiFetch(
         ? 'Не удалось подключиться к серверу. Проверьте, что сервер запущен.'
         : 'Ошибка сети при подключении к серверу. Проверьте, что сервер запущен.';
     throw new ApiNetworkError(errorMessage, error);
+  }
+
+  // Если получили 401, пользователь не авторизован
+  if (response.status === 401) {
+    const authStore = await import('./stores/authStore').then((m) =>
+      m.useAuthStore()
+    );
+    authStore.isAuthenticated = false;
+    authStore.user = null;
   }
 
   // Если получили ошибку HTTP (4xx, 5xx), выбрасываем исключение
