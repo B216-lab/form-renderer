@@ -19,7 +19,6 @@ const routes = [
     path: '/',
     name: 'day-movements',
     component: DayMovements,
-    meta: { requiresAuth: true },
   },
   {
     path: '/consent',

@@ -8,7 +8,7 @@ services:
       - '4173:4173'
     restart: unless-stopped
     networks:
-      - shared-external
+      - shared-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4173" ]
       interval: 30s
@@ -17,5 +17,5 @@ services:
       start_period: 10s
 
 networks:
-  shared-external:
+  shared-net:
     external: true
