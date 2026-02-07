@@ -14,13 +14,13 @@ ARG VITE_API_BASE_URL
 ARG VITE_DADATA_KEY
 ARG VITE_DADATA_API
 
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-ENV VITE_DADATA_KEY=$VITE_DADATA_KEY
-ENV VITE_DADATA_API=$VITE_DADATA_API
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_DADATA_KEY=$VITE_DADATA_KEY \
+    VITE_DADATA_API=$VITE_DADATA_API
 
 RUN pnpm run build
 
-FROM node:25-bullseye
+FROM nginx:stable-alpine3.23-slim
 
 LABEL org.opencontainers.image.title="Geoform" \
     org.opencontainers.image.description="Vue.js application for geodata collection" \
@@ -32,22 +32,17 @@ LABEL org.opencontainers.image.title="Geoform" \
     org.opencontainers.image.url="https://github.com/b216/manual-geoform" \
     maintainer="Kirill Zhilenkov & B216 Team"
 
-ENV NODE_ENV=production \
-    HOST=0.0.0.0 \
-    PORT=4173
+# Устанавливаем gettext для envsubst (генерация env.js из шаблона)
+RUN apk add --no-cache gettext
 
-WORKDIR /app
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml* ./
+# Копируем шаблон env.js и entrypoint скрипт для генерации runtime конфигурации
+COPY env.template.js /usr/share/nginx/html/env.template.js
+COPY docker-entrypoint.d/10-env.sh /docker-entrypoint.d/10-env.sh
+RUN chmod +x /docker-entrypoint.d/10-env.sh
 
-RUN npm install -g pnpm@10.23.0 && \
-    pnpm install --frozen-lockfile --prod && \
-    pnpm add -D vite@latest
-
-
-COPY --from=builder /app/dist ./dist
-
-# default port
 EXPOSE 4173
-
-CMD ["sh", "-c", "pnpm run preview --host ${HOST} --port ${PORT}"]
+# Генерируем env.js из шаблона при старте контейнера, затем запускаем nginx
+CMD ["sh", "-c", "/docker-entrypoint.d/10-env.sh && nginx -g 'daemon off;'"]

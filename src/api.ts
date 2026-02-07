@@ -1,8 +1,4 @@
-/**
- * Базовый URL API бэкенда.
- * Может быть переопределён через переменную окружения.
- */
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+import { getApiBaseUrl } from './runtimeConfig';
 
 /**
  * Имя заголовка, через который CSRF-токен передаётся обратно на сервер.
@@ -36,7 +32,7 @@ async function ensureCsrfTokenLoaded(): Promise<void> {
 
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}/api/v1/auth/csrf`, {
+    response = await fetch(`${getApiBaseUrl()}/api/v1/auth/csrf`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -131,7 +127,7 @@ export async function apiFetch(
   path: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
+  const url = path.startsWith('http') ? path : `${getApiBaseUrl()}${path}`;
 
   const headers = new Headers(options.headers || {});
 

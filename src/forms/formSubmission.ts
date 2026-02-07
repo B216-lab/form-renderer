@@ -1,6 +1,5 @@
 import type { Vueform } from '@vueform/vueform';
-
-const FORM_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL}/api/v1/public/forms/movements`;
+import { getApiBaseUrl } from '../runtimeConfig';
 
 /**
  * Отправляет данные формы на сервер с использованием apiFetch для поддержки cookies и CSRF.
@@ -18,8 +17,11 @@ export async function submitForm(
   // Используем requestData, который исключает условные элементы и форматирует как JSON
   const rawData = form$.requestData as Record<string, unknown>;
 
+  // Вычисляем endpoint с использованием runtime конфигурации
+  const formEndpoint = `${getApiBaseUrl()}/api/v1/public/forms/movements`;
+
   // Отправляем данные через apiFetch, который автоматически добавляет cookies и CSRF токен
-  const response = await fetch(FORM_ENDPOINT, {
+  const response = await fetch(formEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
