@@ -6,7 +6,7 @@ COPY package.json pnpm-lock.yaml* ./
 
 # Install pnpm globally and then dependencies for build
 RUN npm install -g pnpm@10.23.0 && \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --prod
 
 COPY . .
 
