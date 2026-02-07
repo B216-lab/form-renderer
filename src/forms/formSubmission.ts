@@ -18,7 +18,7 @@ export async function submitForm(
   const rawData = form$.requestData as Record<string, unknown>;
 
   // Вычисляем endpoint с использованием runtime конфигурации
-  const formEndpoint = `${getApiBaseUrl()}/api/v1/public/forms/movements`;
+  const formEndpoint = `${getApiBaseUrl()}/v1/public/forms/movements`;
 
   // Отправляем данные через apiFetch, который автоматически добавляет cookies и CSRF токен
   const response = await fetch(formEndpoint, {

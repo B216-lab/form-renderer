@@ -23,7 +23,7 @@ export function resetCsrfTokenCache(): void {
 
 /**
  * Загружает CSRF-токен с бэкенда и кеширует его в памяти.
- * Эндпоинт `/api/v1/auth/csrf` возвращает имя заголовка и значение токена.
+ * Эндпоинт `/v1/auth/csrf` возвращает имя заголовка и значение токена.
  */
 async function ensureCsrfTokenLoaded(): Promise<void> {
   if (cachedCsrfToken) {
@@ -32,7 +32,7 @@ async function ensureCsrfTokenLoaded(): Promise<void> {
 
   let response: Response;
   try {
-    response = await fetch(`${getApiBaseUrl()}/api/v1/auth/csrf`, {
+    response = await fetch(`${getApiBaseUrl()}/v1/auth/csrf`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -117,7 +117,7 @@ export class ApiInternalHttpError extends ApiHttpError {
  * Выполняет запрос к API с автоматическим добавлением credentials для сессий.
  * Все запросы отправляют cookies (JSESSIONID) для поддержки сессий Spring Boot.
  *
- * @param path путь к эндпоинту (например, '/api/v1/auth/login')
+ * @param path путь к эндпоинту (например, '/v1/auth/login')
  * @param options опции запроса (метод, заголовки, тело и т.д.)
  * @returns Promise с Response объектом
  * @throws ApiNetworkError если произошла сетевая ошибка (сервер недоступен)

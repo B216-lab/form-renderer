@@ -33,7 +33,7 @@ describe('formSubmission', () => {
     await submitForm(mockFormData, mockForm);
 
     expect(apiModule.apiFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/forms/movements'),
+      expect.stringContaining('/v1/forms/movements'),
       expect.objectContaining({
         method: 'POST',
         headers: {

@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
     async login(email: string, password: string): Promise<void> {
       this.isLoading = true;
       try {
-        const response = await apiFetch('/api/v1/auth/login', {
+        const response = await apiFetch('/v1/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export const useAuthStore = defineStore('auth', {
     async register(email: string, password: string): Promise<void> {
       this.isLoading = true;
       try {
-        await apiFetch('/api/v1/signup', {
+        await apiFetch('/v1/signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true;
       this.lastNetworkError = null;
       try {
-        const response = await apiFetch('/api/v1/auth/me', {
+        const response = await apiFetch('/v1/auth/me', {
           method: 'GET',
         });
 
@@ -176,7 +176,7 @@ export const useAuthStore = defineStore('auth', {
     async requestOneTimeToken(email: string): Promise<{ expiresAt: string }> {
       this.isLoading = true;
       try {
-        const response = await apiFetch('/api/v1/auth/ott', {
+        const response = await apiFetch('/v1/auth/ott', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ export const useAuthStore = defineStore('auth', {
     async loginWithOneTimeToken(token: string): Promise<void> {
       this.isLoading = true;
       try {
-        const response = await apiFetch('/api/v1/auth/submit-ott', {
+        const response = await apiFetch('/v1/auth/submit-ott', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

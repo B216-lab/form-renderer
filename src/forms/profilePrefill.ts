@@ -17,7 +17,7 @@ export async function prefillFromProfile(
   if (!form$.value) return;
 
   try {
-    const response = await apiFetch('/api/v1/auth/me', { method: 'GET' });
+    const response = await apiFetch('/v1/auth/me', { method: 'GET' });
     const profile = await response.json();
 
     if (profile.error) {
