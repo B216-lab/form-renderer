@@ -27,6 +27,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  preview: {
+    allowedHosts: [
+      ".b216.ru"
+    ]
+  },
   server: {
     allowedHosts: true,
     host: true,
