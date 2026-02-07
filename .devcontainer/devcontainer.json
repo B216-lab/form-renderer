@@ -32,7 +32,7 @@
     "source=manual-geoform-pnpm-store,target=${containerWorkspaceFolder}/pnpm-store,type=volume"
   ],
   // "postCreateCommand": "npm install -g corepack && corepack enable && corepack install", // apparently it's not required
-  "postAttachCommand": "pnpm install --frozen-lockfile",
+  "postAttachCommand": "sudo chown -R vscode:vscode . && pnpm install --frozen-lockfile",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {

@@ -243,7 +243,7 @@
                         :rules="[
                           'nullable',
                           'required',
-                          'min:5',
+                          'min:0',
                           'max:180',
                           'integer',
                         ]"
@@ -264,7 +264,7 @@
                         :rules="[
                           'nullable',
                           'required',
-                          'min:5',
+                          'min:0',
                           'max:180',
                           'integer',
                         ]"
