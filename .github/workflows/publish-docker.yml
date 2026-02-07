@@ -1,4 +1,4 @@
-name: Continuous Deployment - Geoform
+name: Publish Docker image
 
 on:
   push:
@@ -52,15 +52,3 @@ jobs:
             VITE_DADATA_KEY=${{ secrets.VITE_DADATA_KEY }}
             VITE_DADATA_API=${{ vars.VITE_DADATA_API }}
 
-      - name: update docker image and restart
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd /opt/geoform
-            docker compose down frontend
-            docker compose pull frontend
-            docker compose up -d

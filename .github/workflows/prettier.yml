@@ -1,4 +1,4 @@
-name: Style with prettier
+name: Lint with prettier
 on:
   pull_request:
     branches:
