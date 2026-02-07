@@ -28,9 +28,7 @@ export default defineConfig({
     },
   },
   preview: {
-    allowedHosts: [
-      ".b216.ru"
-    ]
+    allowedHosts: true // TODO figure out why it's not working with precise host
   },
   server: {
     allowedHosts: true,
